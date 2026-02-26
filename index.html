@@ -873,7 +873,6 @@ form-action 'self';
               </div>
             </div>
 
-            
             <div class="section-card">
               <div class="section-header">
                 <div class="section-header-left">
@@ -1028,7 +1027,7 @@ form-action 'self';
     <script>
       /* ===== Seguridad básica ruta/host ===== */
       const ALLOWED_HOST = "pauibz.github.io";
-      const ALLOWED_PATH_PREFIX = "/TestTeams";
+      const ALLOWED_PATH_PREFIX = "/TestTeams/";
 
       if (
         location.hostname !== ALLOWED_HOST ||
@@ -1066,8 +1065,8 @@ form-action 'self';
           navigateToLoginRequestUrl: false,
         },
         cache: {
-          cacheLocation: "sessionStorage",
-          storeAuthStateInCookie: false,
+          cacheLocation: "localStorage",
+          storeAuthStateInCookie: true,
         },
       };
 
@@ -1281,26 +1280,29 @@ form-action 'self';
         );
       }
 
-      /* ===== Auth/Graph ===== */
       async function getToken() {
-        let account = msalInstance.getAllAccounts()[0];
+        const accounts = msalInstance.getAllAccounts();
+        let account = accounts[0];
 
         if (!account) {
-          const loginResponse = await msalInstance.loginPopup({
-            scopes: SCOPES,
-            prompt: "select_account",
-          });
-          account = loginResponse.account;
+          // dentro de Teams desktop es más fiable redirect que popup
+          await msalInstance.loginRedirect({ scopes: SCOPES });
+          // el flujo vuelve a la página, así que esto no continúa normalmente
+          return null;
         }
 
-        const tokenResponse = await msalInstance.acquireTokenSilent({
-          scopes: SCOPES,
-          account,
-        });
-
-        return tokenResponse.accessToken;
+        try {
+          const tokenResponse = await msalInstance.acquireTokenSilent({
+            scopes: SCOPES,
+            account,
+          });
+          return tokenResponse.accessToken;
+        } catch (e) {
+          // si falla silent, fuerza redirect
+          await msalInstance.acquireTokenRedirect({ scopes: SCOPES });
+          return null;
+        }
       }
-
       async function callGraph(endpoint, token) {
         const res = await fetch(`https://graph.microsoft.com/v1.0${endpoint}`, {
           method: "GET",
@@ -1321,19 +1323,12 @@ form-action 'self';
       }
 
       async function doLogin() {
-        if (!CONFIGURED) {
-          showError("Configura CLIENT_ID y TENANT_ID.");
-          return;
-        }
-
         try {
           showLoading("Iniciando sesión...");
-          await msalInstance.loginPopup({ scopes: SCOPES });
-          showApp();
-          await loadAllData();
+          await msalInstance.loginRedirect({ scopes: SCOPES });
         } catch (e) {
           hideLoading();
-          showError("Error de autenticación (revisa permisos en Azure).");
+          showError("Error de autenticación.");
           console.error(e);
         }
       }
@@ -1480,18 +1475,22 @@ form-action 'self';
           });
         });
 
-        // Auto-login si ya hay sesión
-        if (!CONFIGURED) return;
-        try {
-          await msalInstance.handleRedirectPromise();
-          const accounts = msalInstance.getAllAccounts();
-          if (accounts.length > 0) {
-            showApp();
-            await loadAllData();
+        (async () => {
+          try {
+            const resp = await msalInstance.handleRedirectPromise();
+            const accounts = msalInstance.getAllAccounts();
+            if (accounts.length > 0) {
+              showApp();
+              await loadAllData();
+            } else {
+              // sigue en login screen
+            }
+          } catch (e) {
+            console.warn(e);
+          } finally {
+            hideLoading();
           }
-        } catch (e) {
-          console.warn(e);
-        }
+        })();
       });
     </script>
   </body>
