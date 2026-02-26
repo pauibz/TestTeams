@@ -1,7 +1,7 @@
 /* CONFIGURACIÓN */
 
-const ALLOWED_HOST = "TUUSUARIO.github.io";
-const ALLOWED_PATH_PREFIX = "/NOMBRE_REPO";
+const ALLOWED_HOST = "pauibz.github.io";
+const ALLOWED_PATH_PREFIX = "/TestTeams";
 
 if (
   location.hostname !== ALLOWED_HOST ||
@@ -15,8 +15,8 @@ if (window.top !== window.self) {
   window.top.location = window.self.location;
 }
 
-const CLIENT_ID = "TU_CLIENT_ID_AQUI";
-const TENANT_ID = "TU_TENANT_ID_AQUI";
+const CLIENT_ID = "c6219253-8f6e-48c9-8c4a-766aea58a874";
+const TENANT_ID = "a3cdf8f7-40db-4d0f-8ccb-82310428392a";
 
 const msalConfig = {
   auth: {
