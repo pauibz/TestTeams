@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="es">
   <head>
+    <link rel="icon" href="data:,">
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
@@ -1000,7 +1001,7 @@ form-action 'self';
           Inicia sesión con tu cuenta Microsoft para ver reuniones, tareas y
           correos del día.
         </p>
-        <button class="login-btn" onclick="doLogin()">
+        <button class="login-btn" id="btnLogin">
           <svg viewBox="0 0 21 21" fill="none">
             <rect x="1" y="1" width="9" height="9" fill="#F35325" />
             <rect x="11" y="1" width="9" height="9" fill="#81BC06" />
@@ -1009,8 +1010,8 @@ form-action 'self';
           </svg>
           Continuar con Microsoft
         </button>
-        <button class="login-btn demo" onclick="enterDemoMode()">
-          ▶ Ver demo (datos de ejemplo)
+<button class="login-btn demo" id="btnDemo">
+            ▶ Ver demo (datos de ejemplo)
         </button>
         <div class="login-error" id="loginError"></div>
         <p class="login-note">
@@ -1061,13 +1062,13 @@ form-action 'self';
         </div>
         <div class="header-spacer"></div>
         <span class="header-date" id="headerDate"></span>
-        <div class="avatar-btn" id="avatarBtn" onclick="toggleMenu()">
-          <span id="avatarInitials">?</span>
+<div class="avatar-btn" id="avatarBtn">
+            <span id="avatarInitials">?</span>
           <div class="logout-menu" id="logoutMenu">
             <div class="lm-name" id="menuName">—</div>
             <div class="lm-email" id="menuEmail">—</div>
-            <div class="lm-btn" onclick="doLogout()">
-              <svg
+<div class="lm-btn" id="btnLogout">
+                <svg
                 viewBox="0 0 24 24"
                 width="15"
                 height="15"
@@ -1090,8 +1091,8 @@ form-action 'self';
             <h1 id="greetingText">Cargando…</h1>
             <p id="greetingSub"></p>
           </div>
-          <button class="refresh-btn" onclick="loadAllData()">
-            <svg id="refreshIcon" viewBox="0 0 16 16" fill="currentColor">
+<button class="refresh-btn" id="btnRefresh">
+              <svg id="refreshIcon" viewBox="0 0 16 16" fill="currentColor">
               <path
                 d="M13.5 8A5.5 5.5 0 1 1 8 2.5V1l3 2.5L8 6V4.5A3.5 3.5 0 1 0 11.5 8H13.5Z"
               />
@@ -1271,34 +1272,11 @@ form-action 'self';
                 <div class="presence-select">
                   <label>Cambiar estado</label>
                   <div class="presence-options">
-                    <div
-                      class="presence-opt"
-                      onclick="setPresence(this, '#6BB700', '🟢 Disponible')"
-                    >
-                      <div class="dot available"></div>
-                      Disponible
-                    </div>
-                    <div
-                      class="presence-opt"
-                      onclick="setPresence(this, '#C4314B', '🔴 Ocupado')"
-                    >
-                      <div class="dot busy"></div>
-                      Ocupado
-                    </div>
-                    <div
-                      class="presence-opt"
-                      onclick="setPresence(this, '#F4BE22', '🟡 Ausente')"
-                    >
-                      <div class="dot away"></div>
-                      Ausente
-                    </div>
-                    <div
-                      class="presence-opt"
-                      onclick="setPresence(this, '#C0C0C0', '⚫ No disponible')"
-                    >
-                      <div class="dot offline"></div>
-                      No disponible
-                    </div>
+                    <div class="presence-opt" data-color="#6BB700" data-label="🟢 Disponible">
+                    <div class="presence-opt" data-color="#C4314B" data-label="🔴 Ocupado">
+                    <div class="presence-opt" data-color="#F4BE22" data-label="🟡 Ausente">
+                    <div class="presence-opt" data-color="#C0C0C0" data-label="⚫ No disponible">
+                    <div class="dot offline"> No disponible </div>
                   </div>
                 </div>
                 <div class="divider"></div>
@@ -1334,7 +1312,7 @@ form-action 'self';
 ══════════════════════════════════════════════════════ */
 
       const ALLOWED_HOST = "pauibz.github.io";
-      const ALLOWED_PATH_PREFIX = "/TestTeams"; 
+      const ALLOWED_PATH_PREFIX = "/TestTeams";
 
       if (
         location.hostname !== ALLOWED_HOST ||
@@ -1353,7 +1331,8 @@ form-action 'self';
       const TENANT_ID = "a3cdf8f7-40db-4d0f-8ccb-82310428392a";
 
       const CONFIGURED =
-        CLIENT_ID !== "c6219253-8f6e-48c9-8c4a-766aea58a874" && TENANT_ID !== "a3cdf8f7-40db-4d0f-8ccb-82310428392a";
+        CLIENT_ID !== "c6219253-8f6e-48c9-8c4a-766aea58a874" &&
+        TENANT_ID !== "a3cdf8f7-40db-4d0f-8ccb-82310428392a";
 
       if (!CONFIGURED) {
         console.warn("App no configurada.");
@@ -1541,6 +1520,45 @@ form-action 'self';
           console.warn(e);
         }
       })();
+
+      /* ══════════════════════════════════════════════════════
+   EVENT LISTENERS (SIN INLINE JS)
+══════════════════════════════════════════════════════ */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  // Login
+  const btnLogin = document.getElementById("btnLogin");
+  if (btnLogin) btnLogin.addEventListener("click", doLogin);
+
+  // Demo
+  const btnDemo = document.getElementById("btnDemo");
+  if (btnDemo) btnDemo.addEventListener("click", enterDemoMode);
+
+  // Refresh
+  const btnRefresh = document.getElementById("btnRefresh");
+  if (btnRefresh) btnRefresh.addEventListener("click", loadAllData);
+
+  // Logout
+  const btnLogout = document.getElementById("btnLogout");
+  if (btnLogout) btnLogout.addEventListener("click", doLogout);
+
+  // Avatar menu
+  const avatarBtn = document.getElementById("avatarBtn");
+  if (avatarBtn) avatarBtn.addEventListener("click", toggleMenu);
+
+  // Presence options
+  document.querySelectorAll(".presence-opt").forEach(opt => {
+    opt.addEventListener("click", function() {
+      setPresence(
+        this,
+        this.dataset.color,
+        this.dataset.label
+      );
+    });
+  });
+
+});
     </script>
   </body>
 </html>
