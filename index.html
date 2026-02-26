@@ -57,7 +57,10 @@ form-action 'self';
         padding: 0;
       }
       body {
-        font-family: "Segoe UI", -apple-system, sans-serif;
+        font-family:
+          "Segoe UI",
+          -apple-system,
+          sans-serif;
         background: var(--surface);
         color: var(--text-primary);
         min-height: 100vh;
@@ -71,7 +74,12 @@ form-action 'self';
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #464775 0%, #6264a7 50%, #9ea2d9 100%);
+        background: linear-gradient(
+          135deg,
+          #464775 0%,
+          #6264a7 50%,
+          #9ea2d9 100%
+        );
       }
       .login-card {
         background: #fff;
@@ -121,7 +129,9 @@ form-action 'self';
         align-items: center;
         justify-content: center;
         gap: 10px;
-        transition: background 0.15s, transform 0.1s;
+        transition:
+          background 0.15s,
+          transform 0.1s;
       }
       .login-btn:hover {
         background: var(--brand-dark);
@@ -344,7 +354,9 @@ form-action 'self';
         display: flex;
         align-items: center;
         gap: 14px;
-        transition: box-shadow 0.2s, transform 0.2s;
+        transition:
+          box-shadow 0.2s,
+          transform 0.2s;
         animation: fadeUp 0.4s ease both;
       }
       .kpi-card:hover {
@@ -661,12 +673,18 @@ form-action 'self';
       <div class="login-card">
         <div class="login-logo">
           <svg viewBox="0 0 32 32" fill="none">
-            <path d="M20 11A3.5 3.5 0 1 0 20 4a3.5 3.5 0 0 0 0 7Z" fill="rgba(255,255,255,0.9)" />
+            <path
+              d="M20 11A3.5 3.5 0 1 0 20 4a3.5 3.5 0 0 0 0 7Z"
+              fill="rgba(255,255,255,0.9)"
+            />
             <path
               d="M27.5 13H19a.5.5 0 0 0-.5.5V21a5.5 5.5 0 0 0 11 0v-7.5a.5.5 0 0 0-.5-.5h-.5Z"
               fill="rgba(255,255,255,0.9)"
             />
-            <path d="M11.5 11A3.5 3.5 0 1 0 11.5 4a3.5 3.5 0 0 0 0 7Z" fill="rgba(255,255,255,0.55)" />
+            <path
+              d="M11.5 11A3.5 3.5 0 1 0 11.5 4a3.5 3.5 0 0 0 0 7Z"
+              fill="rgba(255,255,255,0.55)"
+            />
             <path
               d="M15 14H4a1 1 0 0 0-1 1v8a6 6 0 0 0 12 0v-8a1 1 0 0 0-1-1h1Z"
               fill="rgba(255,255,255,0.55)"
@@ -674,7 +692,10 @@ form-action 'self';
           </svg>
         </div>
         <h2>Mi Día · Teams</h2>
-        <p>Inicia sesión con tu cuenta Microsoft para ver reuniones, tareas y correos del día.</p>
+        <p>
+          Inicia sesión con tu cuenta Microsoft para ver reuniones, tareas y
+          correos del día.
+        </p>
 
         <button class="login-btn" id="btnLogin">
           <svg viewBox="0 0 21 21" fill="none">
@@ -686,7 +707,9 @@ form-action 'self';
           Continuar con Microsoft
         </button>
 
-        <button class="login-btn demo" id="btnDemo">▶ Ver demo (datos de ejemplo)</button>
+        <button class="login-btn demo" id="btnDemo">
+          ▶ Ver demo (datos de ejemplo)
+        </button>
 
         <div class="login-error" id="loginError"></div>
 
@@ -708,12 +731,18 @@ form-action 'self';
       <header>
         <div class="header-logo">
           <svg viewBox="0 0 22 22" fill="none">
-            <path d="M14 7.5A2.5 2.5 0 1 0 14 2.5 2.5 2.5 0 0 0 14 7.5Z" fill="rgba(255,255,255,0.9)" />
+            <path
+              d="M14 7.5A2.5 2.5 0 1 0 14 2.5 2.5 2.5 0 0 0 14 7.5Z"
+              fill="rgba(255,255,255,0.9)"
+            />
             <path
               d="M19.5 9H13a.5.5 0 0 0-.5.5V15a4 4 0 0 0 8 0V9.5a.5.5 0 0 0-.5-.5Z"
               fill="rgba(255,255,255,0.9)"
             />
-            <path d="M8.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" fill="rgba(255,255,255,0.6)" />
+            <path
+              d="M8.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+              fill="rgba(255,255,255,0.6)"
+            />
             <path
               d="M11 10H2a1 1 0 0 0-1 1v6a4.5 4.5 0 0 0 9 0v-6a1 1 0 0 0-1-1h1Z"
               fill="rgba(255,255,255,0.6)"
@@ -730,7 +759,12 @@ form-action 'self';
             <div class="lm-name" id="menuName">—</div>
             <div class="lm-email" id="menuEmail">—</div>
             <div class="lm-btn" id="btnLogout">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+              <svg
+                viewBox="0 0 24 24"
+                width="15"
+                height="15"
+                fill="currentColor"
+              >
                 <path
                   d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
                 />
@@ -774,7 +808,9 @@ form-action 'self';
           <div class="kpi-card">
             <div class="kpi-icon green">
               <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z" />
+                <path
+                  d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"
+                />
               </svg>
             </div>
             <div>
@@ -825,7 +861,12 @@ form-action 'self';
                   <span class="section-title">Reuniones de hoy</span>
                   <span class="badge" id="badgeMeetings">0</span>
                 </div>
-                <a class="section-link" href="https://teams.microsoft.com" target="_blank">Ver calendario →</a>
+                <a
+                  class="section-link"
+                  href="https://teams.microsoft.com"
+                  target="_blank"
+                  >Ver calendario →</a
+                >
               </div>
               <div class="section-body" id="meetingsList">
                 <div class="empty-state">Cargando…</div>
@@ -845,7 +886,12 @@ form-action 'self';
                   <span class="section-title">Correos importantes</span>
                   <span class="badge" id="badgeMail">0</span>
                 </div>
-                <a class="section-link" href="https://outlook.office.com" target="_blank">Ver Outlook →</a>
+                <a
+                  class="section-link"
+                  href="https://outlook.office.com"
+                  target="_blank"
+                  >Ver Outlook →</a
+                >
               </div>
               <div class="section-body" id="mailList">
                 <div class="empty-state">Cargando…</div>
@@ -859,13 +905,20 @@ form-action 'self';
                 <div class="section-header-left">
                   <div class="section-icon green">
                     <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z" />
+                      <path
+                        d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"
+                      />
                     </svg>
                   </div>
                   <span class="section-title">Planner · Mis tareas</span>
                   <span class="badge" id="badgeTasks">0</span>
                 </div>
-                <a class="section-link" href="https://tasks.office.com" target="_blank">Ver Planner →</a>
+                <a
+                  class="section-link"
+                  href="https://tasks.office.com"
+                  target="_blank"
+                  >Ver Planner →</a
+                >
               </div>
               <div class="section-body" id="tasksList">
                 <div class="empty-state">Cargando…</div>
@@ -890,31 +943,53 @@ form-action 'self';
                 <div class="presence-user">
                   <div class="presence-avatar">
                     <span id="presenceAvatarText">?</span>
-                    <div class="presence-indicator" id="presenceIndicator" style="background: #c0c0c0"></div>
+                    <div
+                      class="presence-indicator"
+                      id="presenceIndicator"
+                      style="background: #c0c0c0"
+                    ></div>
                   </div>
                   <div>
                     <div class="presence-name" id="presenceName">—</div>
                     <div class="presence-role" id="presenceRole"></div>
-                    <div class="presence-status-text" id="presenceStatusText">⚫ Desconocido</div>
+                    <div class="presence-status-text" id="presenceStatusText">
+                      ⚫ Desconocido
+                    </div>
                   </div>
                 </div>
 
                 <div class="presence-select">
                   <label>Cambiar estado</label>
                   <div class="presence-options">
-                    <div class="presence-opt" data-color="#6BB700" data-label="🟢 Disponible">
+                    <div
+                      class="presence-opt"
+                      data-color="#6BB700"
+                      data-label="🟢 Disponible"
+                    >
                       <div class="dot available"></div>
                       Disponible
                     </div>
-                    <div class="presence-opt" data-color="#C4314B" data-label="🔴 Ocupado">
+                    <div
+                      class="presence-opt"
+                      data-color="#C4314B"
+                      data-label="🔴 Ocupado"
+                    >
                       <div class="dot busy"></div>
                       Ocupado
                     </div>
-                    <div class="presence-opt" data-color="#F4BE22" data-label="🟡 Ausente">
+                    <div
+                      class="presence-opt"
+                      data-color="#F4BE22"
+                      data-label="🟡 Ausente"
+                    >
                       <div class="dot away"></div>
                       Ausente
                     </div>
-                    <div class="presence-opt" data-color="#C0C0C0" data-label="⚫ No disponible">
+                    <div
+                      class="presence-opt"
+                      data-color="#C0C0C0"
+                      data-label="⚫ No disponible"
+                    >
                       <div class="dot offline"></div>
                       No disponible
                     </div>
@@ -961,9 +1036,20 @@ form-action 'self';
         document.body.innerHTML = "<h2>Acceso no autorizado</h2>";
         throw new Error("Dominio o ruta no autorizados");
       }
-
+      // Si está embebido (por ejemplo en Teams), NO intentes navegar el top.
+      // En su lugar, muestra un enlace para abrir en nueva pestaña.
       if (window.top !== window.self) {
-        window.top.location = window.self.location;
+        // Opcional: muestra un aviso en pantalla (simple)
+        const banner = document.createElement("div");
+        banner.style.cssText =
+          "position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 14px;" +
+          "background:#fff4ce;color:#8a5a00;border-bottom:1px solid #f4be22;" +
+          "font:13px Segoe UI, sans-serif;display:flex;gap:10px;align-items:center;justify-content:space-between;";
+        banner.innerHTML =
+          `<div>Estás viendo la app dentro de un contenedor (Teams). Algunas redirecciones están bloqueadas.</div>` +
+          `<a href="${location.href}" target="_blank" rel="noopener noreferrer" ` +
+          `style="background:#6264a7;color:#fff;padding:6px 10px;border-radius:6px;text-decoration:none;font-weight:600;">Abrir en navegador</a>`;
+        document.body.appendChild(banner);
       }
 
       /* ===== Config MSAL ===== */
@@ -1050,9 +1136,9 @@ form-action 'self';
 
       /* ===== Presence UI ===== */
       function setPresence(optEl, color, label) {
-        document.querySelectorAll(".presence-opt").forEach((x) =>
-          x.classList.remove("active"),
-        );
+        document
+          .querySelectorAll(".presence-opt")
+          .forEach((x) => x.classList.remove("active"));
         if (optEl) optEl.classList.add("active");
         document.getElementById("presenceIndicator").style.background = color;
         document.getElementById("presenceStatusText").textContent = label;
@@ -1085,10 +1171,13 @@ form-action 'self';
           .map((x) => x[0].toUpperCase())
           .join("");
         document.getElementById("avatarInitials").textContent = initials || "?";
-        document.getElementById("presenceAvatarText").textContent = initials || "?";
+        document.getElementById("presenceAvatarText").textContent =
+          initials || "?";
 
-        document.getElementById("greetingText").textContent = `Hola, ${name.split(" ")[0] || "—"}`;
-        document.getElementById("greetingSub").textContent = "Este es tu resumen del día.";
+        document.getElementById("greetingText").textContent =
+          `Hola, ${name.split(" ")[0] || "—"}`;
+        document.getElementById("greetingSub").textContent =
+          "Este es tu resumen del día.";
       }
 
       function renderMeetings(items) {
@@ -1108,10 +1197,16 @@ form-action 'self';
             const start = m.start?.dateTime ? new Date(m.start.dateTime) : null;
             const end = m.end?.dateTime ? new Date(m.end.dateTime) : null;
             const time = start
-              ? start.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+              ? start.toLocaleTimeString("es-ES", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
               : "--:--";
             const timeEnd = end
-              ? end.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+              ? end.toLocaleTimeString("es-ES", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
               : "";
             return `<div class="meeting-item"><strong>${time}${timeEnd ? " - " + timeEnd : ""}</strong> · ${subject}</div>`;
           })
@@ -1130,7 +1225,10 @@ form-action 'self';
 
         list.innerHTML = items
           .slice(0, 8)
-          .map((t) => `<div class="task-item">${sanitize(t.title || "Tarea")}</div>`)
+          .map(
+            (t) =>
+              `<div class="task-item">${sanitize(t.title || "Tarea")}</div>`,
+          )
           .join("");
       }
 
@@ -1155,22 +1253,31 @@ form-action 'self';
       }
 
       function updateKPIs(meetingsCount, tasks, mail) {
-        document.getElementById("kpiMeetings").textContent = String(meetingsCount || 0);
+        document.getElementById("kpiMeetings").textContent = String(
+          meetingsCount || 0,
+        );
         document.getElementById("kpiMail").textContent = String(
           (mail || []).filter((m) => m.isRead === false).length,
         );
 
         // Planner: el endpoint /me/planner/tasks no siempre devuelve "percentComplete" dependiendo permisos/escopes
-        const done = (tasks || []).filter((t) => t.percentComplete === 100).length;
-        const pending = (tasks || []).filter((t) => t.percentComplete !== 100).length;
+        const done = (tasks || []).filter(
+          (t) => t.percentComplete === 100,
+        ).length;
+        const pending = (tasks || []).filter(
+          (t) => t.percentComplete !== 100,
+        ).length;
 
         document.getElementById("kpiDone").textContent = String(done);
         document.getElementById("kpiPending").textContent = String(pending);
 
         document.getElementById("statDone").textContent = String(done);
         document.getElementById("statPend").textContent = String(pending);
-        document.getElementById("statUnread").textContent = document.getElementById("kpiMail").textContent;
-        document.getElementById("statMeetTime").textContent = String(meetingsCount || 0);
+        document.getElementById("statUnread").textContent =
+          document.getElementById("kpiMail").textContent;
+        document.getElementById("statMeetTime").textContent = String(
+          meetingsCount || 0,
+        );
       }
 
       /* ===== Auth/Graph ===== */
@@ -1245,17 +1352,37 @@ form-action 'self';
           const token = await getToken();
 
           const now = new Date();
-          const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-          const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+          const start = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            0,
+            0,
+            0,
+          );
+          const end = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            23,
+            59,
+            59,
+          );
 
           const startISO = start.toISOString();
           const endISO = end.toISOString();
 
           const [me, cal, tasks, mail, pres] = await Promise.all([
             callGraph("/me", token),
-            callGraph(`/me/calendarView?startDateTime=${encodeURIComponent(startISO)}&endDateTime=${encodeURIComponent(endISO)}`, token),
+            callGraph(
+              `/me/calendarView?startDateTime=${encodeURIComponent(startISO)}&endDateTime=${encodeURIComponent(endISO)}`,
+              token,
+            ),
             callGraph("/me/planner/tasks", token),
-            callGraph("/me/messages?$top=5&$orderby=receivedDateTime desc", token),
+            callGraph(
+              "/me/messages?$top=5&$orderby=receivedDateTime desc",
+              token,
+            ),
             callGraph("/me/presence", token),
           ]);
 
@@ -1270,7 +1397,11 @@ form-action 'self';
           renderMail(mail.value || []);
           if (pres?.availability) applyPresence(pres.availability);
 
-          updateKPIs(cal.value?.length || 0, tasks.value || [], mail.value || []);
+          updateKPIs(
+            cal.value?.length || 0,
+            tasks.value || [],
+            mail.value || [],
+          );
         } catch (err) {
           console.error(err);
           showError("Error cargando datos (revisa scopes/consent en Azure).");
@@ -1290,23 +1421,56 @@ form-action 'self';
         applyPresence("Available");
 
         renderMeetings([
-          { subject: "Daily", start: { dateTime: new Date().toISOString() }, end: { dateTime: new Date(Date.now() + 30 * 60000).toISOString() } },
-          { subject: "Revisión", start: { dateTime: new Date(Date.now() + 2 * 3600000).toISOString() }, end: { dateTime: new Date(Date.now() + 2.5 * 3600000).toISOString() } },
+          {
+            subject: "Daily",
+            start: { dateTime: new Date().toISOString() },
+            end: { dateTime: new Date(Date.now() + 30 * 60000).toISOString() },
+          },
+          {
+            subject: "Revisión",
+            start: {
+              dateTime: new Date(Date.now() + 2 * 3600000).toISOString(),
+            },
+            end: {
+              dateTime: new Date(Date.now() + 2.5 * 3600000).toISOString(),
+            },
+          },
         ]);
-        renderTasks([{ title: "Preparar informe", percentComplete: 0 }, { title: "Enviar correo", percentComplete: 100 }]);
-        renderMail([{ subject: "Bienvenido", from: { emailAddress: { name: "Equipo" } }, isRead: false }]);
+        renderTasks([
+          { title: "Preparar informe", percentComplete: 0 },
+          { title: "Enviar correo", percentComplete: 100 },
+        ]);
+        renderMail([
+          {
+            subject: "Bienvenido",
+            from: { emailAddress: { name: "Equipo" } },
+            isRead: false,
+          },
+        ]);
 
-        updateKPIs(2, [{ percentComplete: 0 }, { percentComplete: 100 }], [{ isRead: false }]);
+        updateKPIs(
+          2,
+          [{ percentComplete: 0 }, { percentComplete: 100 }],
+          [{ isRead: false }],
+        );
       }
 
       /* ===== Autologin + listeners ===== */
       document.addEventListener("DOMContentLoaded", async () => {
         // Buttons
         document.getElementById("btnLogin")?.addEventListener("click", doLogin);
-        document.getElementById("btnDemo")?.addEventListener("click", enterDemoMode);
-        document.getElementById("btnRefresh")?.addEventListener("click", loadAllData);
-        document.getElementById("btnLogout")?.addEventListener("click", doLogout);
-        document.getElementById("avatarBtn")?.addEventListener("click", toggleMenu);
+        document
+          .getElementById("btnDemo")
+          ?.addEventListener("click", enterDemoMode);
+        document
+          .getElementById("btnRefresh")
+          ?.addEventListener("click", loadAllData);
+        document
+          .getElementById("btnLogout")
+          ?.addEventListener("click", doLogout);
+        document
+          .getElementById("avatarBtn")
+          ?.addEventListener("click", toggleMenu);
 
         // Presence options
         document.querySelectorAll(".presence-opt").forEach((opt) => {
