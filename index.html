@@ -1027,7 +1027,7 @@ form-action 'self';
     <script>
       /* ===== Seguridad básica ruta/host ===== */
       const ALLOWED_HOST = "pauibz.github.io";
-      const ALLOWED_PATH_PREFIX = "/TestTeams/";
+      const ALLOWED_PATH_PREFIX = "/TestTeams"; // <-- sin barra final
 
       if (
         location.hostname !== ALLOWED_HOST ||
@@ -1036,20 +1036,24 @@ form-action 'self';
         document.body.innerHTML = "<h2>Acceso no autorizado</h2>";
         throw new Error("Dominio o ruta no autorizados");
       }
-      // Si está embebido (por ejemplo en Teams), NO intentes navegar el top.
-      // En su lugar, muestra un enlace para abrir en nueva pestaña.
-      if (window.top !== window.self) {
-        // Opcional: muestra un aviso en pantalla (simple)
+
+      // Teams desktop/web suele embedir en iframe. NO navegues el top.
+      const IS_IFRAME = window.top !== window.self;
+
+      // Banner solo informativo + botón abrir fuera (esto sí lo permite porque es un click del usuario)
+      if (IS_IFRAME) {
         const banner = document.createElement("div");
         banner.style.cssText =
           "position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 14px;" +
           "background:#fff4ce;color:#8a5a00;border-bottom:1px solid #f4be22;" +
           "font:13px Segoe UI, sans-serif;display:flex;gap:10px;align-items:center;justify-content:space-between;";
         banner.innerHTML =
-          `<div>Estás viendo la app dentro de un contenedor (Teams). Algunas redirecciones están bloqueadas.</div>` +
+          `<div>Estás viendo la app dentro de Teams (iframe). El inicio de sesión por redirección está bloqueado; se usará ventana emergente.</div>` +
           `<a href="${location.href}" target="_blank" rel="noopener noreferrer" ` +
           `style="background:#6264a7;color:#fff;padding:6px 10px;border-radius:6px;text-decoration:none;font-weight:600;">Abrir en navegador</a>`;
         document.body.appendChild(banner);
+        // Para que no tape el contenido
+        document.body.style.paddingTop = "52px";
       }
 
       /* ===== Config MSAL ===== */
@@ -1057,11 +1061,14 @@ form-action 'self';
       const TENANT_ID = "a3cdf8f7-40db-4d0f-8ccb-82310428392a";
       const CONFIGURED = Boolean(CLIENT_ID && TENANT_ID);
 
+      // Importante: el redirectUri debe apuntar a /TestTeams/ (con barra final)
+      const REDIRECT_URI = `${window.location.origin}${ALLOWED_PATH_PREFIX}/`;
+
       const msalConfig = {
         auth: {
           clientId: CLIENT_ID,
           authority: `https://login.microsoftonline.com/${TENANT_ID}`,
-          redirectUri: window.location.origin + ALLOWED_PATH_PREFIX,
+          redirectUri: REDIRECT_URI,
           navigateToLoginRequestUrl: false,
         },
         cache: {
@@ -1125,8 +1132,8 @@ form-action 'self';
         const d = new Date();
         const opts = { weekday: "long", day: "2-digit", month: "long" };
         const txt = d.toLocaleDateString("es-ES", opts);
-        document.getElementById("headerDate").textContent =
-          txt.charAt(0).toUpperCase() + txt.slice(1);
+        const el = document.getElementById("headerDate");
+        if (el) el.textContent = txt.charAt(0).toUpperCase() + txt.slice(1);
       }
 
       function toggleMenu() {
@@ -1140,8 +1147,10 @@ form-action 'self';
           .querySelectorAll(".presence-opt")
           .forEach((x) => x.classList.remove("active"));
         if (optEl) optEl.classList.add("active");
-        document.getElementById("presenceIndicator").style.background = color;
-        document.getElementById("presenceStatusText").textContent = label;
+        const ind = document.getElementById("presenceIndicator");
+        const txt = document.getElementById("presenceStatusText");
+        if (ind) ind.style.background = color;
+        if (txt) txt.textContent = label;
       }
 
       function applyPresence(availability) {
@@ -1152,8 +1161,10 @@ form-action 'self';
           Offline: { color: "#C0C0C0", label: "⚫ No disponible" },
         };
         const v = map[availability] || map.Offline;
-        document.getElementById("presenceIndicator").style.background = v.color;
-        document.getElementById("presenceStatusText").textContent = v.label;
+        const ind = document.getElementById("presenceIndicator");
+        const txt = document.getElementById("presenceStatusText");
+        if (ind) ind.style.background = v.color;
+        if (txt) txt.textContent = v.label;
       }
 
       /* ===== Renderers básicos ===== */
@@ -1260,7 +1271,6 @@ form-action 'self';
           (mail || []).filter((m) => m.isRead === false).length,
         );
 
-        // Planner: el endpoint /me/planner/tasks no siempre devuelve "percentComplete" dependiendo permisos/escopes
         const done = (tasks || []).filter(
           (t) => t.percentComplete === 100,
         ).length;
@@ -1280,16 +1290,22 @@ form-action 'self';
         );
       }
 
-      async function getToken() {
+      /* ===== Auth: SIEMPRE popup (compatible con iframe) ===== */
+      async function ensureSignedIn() {
         const accounts = msalInstance.getAllAccounts();
-        let account = accounts[0];
+        if (accounts.length > 0) return accounts[0];
 
-        if (!account) {
-          // dentro de Teams desktop es más fiable redirect que popup
-          await msalInstance.loginRedirect({ scopes: SCOPES });
-          // el flujo vuelve a la página, así que esto no continúa normalmente
-          return null;
-        }
+        // En iframe, redirect NO funciona => popup.
+        // Si el popup fuera bloqueado, el usuario puede usar "Abrir en navegador".
+        const resp = await msalInstance.loginPopup({
+          scopes: SCOPES,
+          prompt: "select_account",
+        });
+        return resp.account;
+      }
+
+      async function getToken() {
+        const account = await ensureSignedIn();
 
         try {
           const tokenResponse = await msalInstance.acquireTokenSilent({
@@ -1298,11 +1314,15 @@ form-action 'self';
           });
           return tokenResponse.accessToken;
         } catch (e) {
-          // si falla silent, fuerza redirect
-          await msalInstance.acquireTokenRedirect({ scopes: SCOPES });
-          return null;
+          // Silent puede fallar por expiración/consent → popup
+          const tokenResponse = await msalInstance.acquireTokenPopup({
+            scopes: SCOPES,
+            account,
+          });
+          return tokenResponse.accessToken;
         }
       }
+
       async function callGraph(endpoint, token) {
         const res = await fetch(`https://graph.microsoft.com/v1.0${endpoint}`, {
           method: "GET",
@@ -1310,42 +1330,48 @@ form-action 'self';
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          mode: "cors",
-          credentials: "omit",
         });
-
         if (!res.ok) throw new Error("Graph API error: " + res.status);
-
         const data = await res.json();
         if (!data) throw new Error("Respuesta inválida de Graph");
-
         return data;
       }
 
       async function doLogin() {
+        if (!CONFIGURED) return showError("Configura CLIENT_ID y TENANT_ID.");
         try {
+          clearError();
           showLoading("Iniciando sesión...");
-          await msalInstance.loginRedirect({ scopes: SCOPES });
+          await ensureSignedIn();
+          showApp();
+          await loadAllData();
         } catch (e) {
-          hideLoading();
-          showError("Error de autenticación.");
           console.error(e);
+          showError(
+            IS_IFRAME
+              ? "No se pudo iniciar sesión en Teams (iframe). Pulsa “Abrir en navegador”."
+              : "Error de autenticación.",
+          );
+        } finally {
+          hideLoading();
         }
       }
 
       function doLogout() {
-        msalInstance.logoutPopup();
-        sessionStorage.clear();
-        location.reload();
+        msalInstance.logoutPopup().finally(() => {
+          localStorage.clear();
+          sessionStorage.clear();
+          location.reload();
+        });
       }
 
       async function loadAllData() {
         if (!CONFIGURED) return;
 
         showLoading("Cargando datos...");
-
         try {
           const token = await getToken();
+          if (!token) return;
 
           const now = new Date();
           const start = new Date(
@@ -1398,12 +1424,13 @@ form-action 'self';
             tasks.value || [],
             mail.value || [],
           );
+          showApp();
         } catch (err) {
           console.error(err);
-          showError("Error cargando datos (revisa scopes/consent en Azure).");
+          showError("Error cargando datos (revisa permisos/consent en Azure).");
+        } finally {
+          hideLoading();
         }
-
-        hideLoading();
       }
 
       /* ===== Demo ===== */
@@ -1422,15 +1449,6 @@ form-action 'self';
             start: { dateTime: new Date().toISOString() },
             end: { dateTime: new Date(Date.now() + 30 * 60000).toISOString() },
           },
-          {
-            subject: "Revisión",
-            start: {
-              dateTime: new Date(Date.now() + 2 * 3600000).toISOString(),
-            },
-            end: {
-              dateTime: new Date(Date.now() + 2.5 * 3600000).toISOString(),
-            },
-          },
         ]);
         renderTasks([
           { title: "Preparar informe", percentComplete: 0 },
@@ -1445,15 +1463,14 @@ form-action 'self';
         ]);
 
         updateKPIs(
-          2,
+          1,
           [{ percentComplete: 0 }, { percentComplete: 100 }],
           [{ isRead: false }],
         );
       }
 
-      /* ===== Autologin + listeners ===== */
+      /* ===== Listeners + autoload ===== */
       document.addEventListener("DOMContentLoaded", async () => {
-        // Buttons
         document.getElementById("btnLogin")?.addEventListener("click", doLogin);
         document
           .getElementById("btnDemo")
@@ -1468,29 +1485,22 @@ form-action 'self';
           .getElementById("avatarBtn")
           ?.addEventListener("click", toggleMenu);
 
-        // Presence options
         document.querySelectorAll(".presence-opt").forEach((opt) => {
           opt.addEventListener("click", function () {
             setPresence(this, this.dataset.color, this.dataset.label);
           });
         });
 
-        (async () => {
-          try {
-            const resp = await msalInstance.handleRedirectPromise();
-            const accounts = msalInstance.getAllAccounts();
-            if (accounts.length > 0) {
-              showApp();
-              await loadAllData();
-            } else {
-              // sigue en login screen
-            }
-          } catch (e) {
-            console.warn(e);
-          } finally {
-            hideLoading();
+        // Si ya hay sesión, carga automáticamente
+        try {
+          const accounts = msalInstance.getAllAccounts();
+          if (accounts.length > 0) {
+            showApp();
+            await loadAllData();
           }
-        })();
+        } catch (e) {
+          console.warn(e);
+        }
       });
     </script>
   </body>
