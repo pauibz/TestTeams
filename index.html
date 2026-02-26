@@ -1,919 +1,1546 @@
-<!-- <!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi App de Teams</title>
-  <script src="https://res.cdn.office.net/teams-js/2.22.0/js/MicrosoftTeams.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f5f5f5;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 40px;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-    .logo {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #6264A7, #7B83EB);
-      border-radius: 20px;
-      margin: 0 auto 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-    }
-    h1 {
-      color: #252525;
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 32px;
-    }
-    .status-box {
-      background: #EFF6FF;
-      border: 1px solid #BFDBFE;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-    .status-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background: #22C55E;
-      border-radius: 50%;
-      margin-right: 8px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .status-text {
-      color: #1E40AF;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .info-item {
-      background: #F9FAFB;
-      border-radius: 8px;
-      padding: 14px;
-      text-align: left;
-    }
-    .info-label { color: #999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .info-value { color: #252525; font-weight: 600; font-size: 15px; margin-top: 4px; }
-    .btn {
-      background: #6264A7;
-      color: white;
-      border: none;
-      padding: 12px 28px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn:hover { background: #4F51A3; }
-    .footer {
-      margin-top: 24px;
-      color: #aaa;
-      font-size: 12px;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="logo">🚀</div>
-    <h1>¡HOLA PAU!!! App de Teams funcionando!</h1>
-    <p class="subtitle">Esta es una pestaña personalizada dentro de Microsoft Teams</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+default-src 'self';
+script-src 'self' https://alcdn.msauth.net;
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+font-src https://fonts.gstatic.com;
+connect-src https://graph.microsoft.com https://login.microsoftonline.com;
+img-src 'self' data:;
+frame-ancestors 'none';
+base-uri 'self';
+form-action 'self';
+"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Día · Teams Dashboard</title>
 
-    <div class="status-box">
-      <span class="status-dot"></span>
-      <span class="status-text" id="teamsStatus">Conectando con Teams SDK...</span>
-    </div>
+    <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-    <div class="info-grid">
-      <div class="info-item">
-        <div class="info-label">Usuario</div>
-        <div class="info-value" id="userName">Cargando...</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Contexto</div>
-        <div class="info-value" id="teamsContext">—</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Tema</div>
-        <div class="info-value" id="teamsTheme">—</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Versión</div>
-        <div class="info-value">1.0.0</div>
-      </div>
-    </div>
+    <style>
+      :root {
+        --brand: #6264a7;
+        --brand-dark: #464775;
+        --brand-light: #e8e8f4;
+        --brand-mid: #9ea2d9;
+        --surface: #f5f5f5;
+        --card: #ffffff;
+        --text-primary: #242424;
+        --text-secondary: #616161;
+        --text-muted: #8a8a8a;
+        --border: #e0e0e0;
+        --success: #107c10;
+        --success-bg: #dff6dd;
+        --warning: #8a5a00;
+        --warning-bg: #fff4ce;
+        --error: #a80000;
+        --error-bg: #fde7e9;
+        --presence-available: #6bb700;
+        --presence-busy: #c4314b;
+        --presence-away: #f4be22;
+        --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+        --radius: 8px;
+        --radius-lg: 12px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          "Segoe UI",
+          -apple-system,
+          sans-serif;
+        background: var(--surface);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
 
-    <button class="btn" onclick="sendNotification()">🔔 Enviar notificación test</button>
+      /* ── LOGIN ── */
+      #loginScreen {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+          135deg,
+          #464775 0%,
+          #6264a7 50%,
+          #9ea2d9 100%
+        );
+      }
+      .login-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 48px 40px;
+        text-align: center;
+        width: 360px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        animation: fadeUp 0.5s ease both;
+      }
+      .login-logo {
+        width: 56px;
+        height: 56px;
+        background: var(--brand);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+      }
+      .login-logo svg {
+        width: 32px;
+        height: 32px;
+      }
+      .login-card h2 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .login-card p {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 28px;
+        line-height: 1.5;
+      }
+      .login-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        background: var(--brand);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+      }
+      .login-btn:hover {
+        background: var(--brand-dark);
+      }
+      .login-btn:active {
+        transform: scale(0.98);
+      }
+      .login-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+      .login-btn.demo {
+        background: #fff;
+        color: var(--brand);
+        border: 2px solid var(--brand);
+        margin-top: 10px;
+      }
+      .login-btn.demo:hover {
+        background: var(--brand-light);
+      }
+      .login-error {
+        margin-top: 14px;
+        padding: 10px 14px;
+        background: var(--error-bg);
+        color: var(--error);
+        border-radius: 6px;
+        font-size: 13px;
+        display: none;
+      }
+      .login-note {
+        margin-top: 18px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
 
-    <div class="footer">App de prueba · Creada para demostrar Teams Apps</div>
-  </div>
+      /* ── CONFIG BANNER ── */
+      #configBanner {
+        background: var(--warning-bg);
+        border-bottom: 2px solid #f4be22;
+        padding: 9px 20px;
+        font-size: 13px;
+        color: var(--warning);
+        display: none;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      #configBanner code {
+        background: rgba(0, 0, 0, 0.08);
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+      }
 
-  <script>
-    microsoftTeams.app.initialize().then(() => {
-      microsoftTeams.app.getContext().then(context => {
-        document.getElementById('teamsStatus').textContent = '✅ Conectado a Microsoft Teams';
-        document.getElementById('userName').textContent = context.user?.displayName || 'Teams User';
-        document.getElementById('teamsContext').textContent = context.page?.frameContext || 'Personal';
-        document.getElementById('teamsTheme').textContent = context.app?.theme || 'default';
-      });
-    }).catch(() => {
-      document.getElementById('teamsStatus').textContent = '⚠️ Ejecutando fuera de Teams';
-      document.getElementById('userName').textContent = 'Demo User';
-      document.getElementById('teamsContext').textContent = 'Browser';
-      document.getElementById('teamsTheme').textContent = 'light';
-    });
+      /* ── LOADING ── */
+      #loadingOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.88);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--brand-light);
+        border-top-color: var(--brand);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 14px;
+      }
+      #loadingOverlay p {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
 
-    function sendNotification() {
-      alert('✅ ¡Notificación enviada! En producción, aquí podrías enviar mensajes al chat de Teams via Bot Framework o webhooks.');
-    }
-  </script>
-</body>
-</html>
- -->
+      /* ── APP SHELL ── */
+      #appShell {
+        display: none;
+        flex-direction: column;
+        flex: 1;
+      }
 
- <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mi Día · Teams Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --brand: #6264A7;
-      --brand-dark: #464775;
-      --brand-light: #E8E8F4;
-      --brand-mid: #9EA2D9;
-      --surface: #F5F5F5;
-      --card: #FFFFFF;
-      --card-hover: #FAFAFA;
-      --text-primary: #242424;
-      --text-secondary: #616161;
-      --text-muted: #8A8A8A;
-      --border: #E0E0E0;
-      --success: #107C10;
-      --success-bg: #DFF6DD;
-      --warning: #8A5A00;
-      --warning-bg: #FFF4CE;
-      --error: #A80000;
-      --error-bg: #FDE7E9;
-      --presence-available: #6BB700;
-      --presence-busy: #C4314B;
-      --presence-away: #F4BE22;
-      --shadow-sm: 0 1px 4px rgba(0,0,0,0.08);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-      --radius: 8px;
-      --radius-lg: 12px;
-    }
+      /* ── HEADER ── */
+      header {
+        background: var(--brand);
+        height: 48px;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        gap: 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+      .header-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .header-logo svg {
+        width: 22px;
+        height: 22px;
+      }
+      .header-title {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .header-spacer {
+        flex: 1;
+      }
+      .header-date {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 13px;
+      }
+      .avatar-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--brand-mid);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        transition: border-color 0.15s;
+        position: relative;
+      }
+      .avatar-btn:hover {
+        border-color: #fff;
+      }
+      .logout-menu {
+        position: absolute;
+        top: 40px;
+        right: 0;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border);
+        min-width: 190px;
+        overflow: hidden;
+        display: none;
+        z-index: 200;
+      }
+      .logout-menu.open {
+        display: block;
+      }
+      .lm-name {
+        padding: 12px 14px 4px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .lm-email {
+        padding: 0 14px 10px;
+        font-size: 12px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border);
+      }
+      .lm-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+        color: var(--error);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.15s;
+      }
+      .lm-btn:hover {
+        background: var(--error-bg);
+      }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+      /* ── MAIN ── */
+      main {
+        flex: 1;
+        padding: 24px 20px;
+        max-width: 1280px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .greeting-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+      .greeting-text h1 {
+        font-size: 24px;
+        font-weight: 600;
+      }
+      .greeting-text p {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+      .refresh-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: var(--radius);
+        border: 1px solid var(--brand);
+        background: #fff;
+        color: var(--brand);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .refresh-btn:hover {
+        background: var(--brand-light);
+      }
+      .refresh-btn svg {
+        width: 14px;
+        height: 14px;
+      }
 
-    body {
-      font-family: 'Segoe UI', -apple-system, sans-serif;
-      background: var(--surface);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+      /* ── KPIs ── */
+      .kpi-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+      .kpi-card {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 18px 20px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition:
+          box-shadow 0.2s,
+          transform 0.2s;
+        animation: fadeUp 0.4s ease both;
+      }
+      .kpi-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+      }
+      .kpi-card:nth-child(1) {
+        animation-delay: 0.05s;
+      }
+      .kpi-card:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .kpi-card:nth-child(3) {
+        animation-delay: 0.15s;
+      }
+      .kpi-card:nth-child(4) {
+        animation-delay: 0.2s;
+      }
+      .kpi-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .kpi-icon svg {
+        width: 22px;
+        height: 22px;
+      }
+      .kpi-icon.purple {
+        background: var(--brand-light);
+        color: var(--brand);
+      }
+      .kpi-icon.green {
+        background: var(--success-bg);
+        color: var(--success);
+      }
+      .kpi-icon.yellow {
+        background: var(--warning-bg);
+        color: var(--warning);
+      }
+      .kpi-icon.blue {
+        background: #deecf9;
+        color: #0078d4;
+      }
+      .kpi-value {
+        font-size: 26px;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .kpi-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 3px;
+      }
 
-    /* ── TOP NAV ── */
-    header {
-      background: var(--brand);
-      height: 48px;
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      gap: 16px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .header-logo svg { width: 22px; height: 22px; }
-    .header-title {
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-    .header-spacer { flex: 1; }
-    .header-date {
-      color: rgba(255,255,255,0.85);
-      font-size: 13px;
-    }
-    .avatar-btn {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: var(--brand-mid);
-      border: 2px solid rgba(255,255,255,0.4);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 600; color: #fff;
-      transition: border-color 0.15s;
-    }
-    .avatar-btn:hover { border-color: #fff; }
+      /* ── GRID ── */
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      .grid-col {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
 
-    /* ── MAIN LAYOUT ── */
-    main {
-      flex: 1;
-      padding: 24px 20px;
-      max-width: 1280px;
-      margin: 0 auto;
-      width: 100%;
-    }
+      /* ── SECTION CARD ── */
+      .section-card {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+      }
+      .section-card:nth-child(1) {
+        animation-delay: 0.22s;
+      }
+      .section-card:nth-child(2) {
+        animation-delay: 0.28s;
+      }
+      .section-card:nth-child(3) {
+        animation-delay: 0.34s;
+      }
+      .section-card:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .section-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .section-icon svg {
+        width: 16px;
+        height: 16px;
+      }
+      .section-icon.purple {
+        background: var(--brand-light);
+        color: var(--brand);
+      }
+      .section-icon.green {
+        background: var(--success-bg);
+        color: var(--success);
+      }
+      .section-icon.blue {
+        background: #deecf9;
+        color: #0078d4;
+      }
+      .section-icon.teal {
+        background: #e0f5f5;
+        color: #007a7c;
+      }
+      .section-title {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: var(--brand);
+        color: #fff;
+      }
+      .section-link {
+        font-size: 12px;
+        color: var(--brand);
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .section-link:hover {
+        text-decoration: underline;
+      }
+      .section-body {
+        padding: 4px 0;
+      }
+      .empty-state {
+        padding: 24px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
 
-    .greeting-row {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-    .greeting-text h1 {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .greeting-text p {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
-    .refresh-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 7px 14px;
-      border-radius: var(--radius);
-      border: 1px solid var(--brand);
-      background: #fff;
-      color: var(--brand);
-      font-size: 13px; font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-    .refresh-btn:hover { background: var(--brand-light); }
-    .refresh-btn svg { width: 14px; height: 14px; }
+      /* ── MEETING ── */
+      .meeting-item {
+        display: flex;
+        align-items: stretch;
+        padding: 12px 20px;
+        gap: 14px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.15s;
+        cursor: pointer;
+      }
+      .meeting-item:last-child {
+        border-bottom: none;
+      }
+      .meeting-item:hover {
+        background: #f7f7fc;
+      }
+      .meeting-time-col {
+        width: 56px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding-top: 2px;
+      }
+      .meeting-time {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--brand);
+      }
+      .meeting-end {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .meeting-bar {
+        width: 3px;
+        border-radius: 2px;
+        background: var(--brand);
+        margin: 4px 0;
+        flex-shrink: 0;
+        min-height: 28px;
+        align-self: stretch;
+      }
+      .meeting-bar.green {
+        background: var(--presence-available);
+      }
+      .meeting-bar.gray {
+        background: #c0c0c0;
+      }
+      .meeting-details {
+        flex: 1;
+        min-width: 0;
+      }
+      .meeting-title {
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .meeting-sub {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+      .meeting-chips {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        background: var(--surface);
+      }
+      .chip.live {
+        background: #c4314b;
+        color: #fff;
+        border-color: transparent;
+        animation: pulse 2s infinite;
+      }
+      .join-btn {
+        align-self: center;
+        flex-shrink: 0;
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: none;
+        background: var(--brand);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .join-btn:hover {
+        background: var(--brand-dark);
+      }
+      .join-btn.past {
+        background: var(--border);
+        color: var(--text-muted);
+        cursor: default;
+      }
 
-    /* ── KPI STRIP ── */
-    .kpi-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-    .kpi-card {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      padding: 18px 20px;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border);
-      display: flex; align-items: center; gap: 14px;
-      transition: box-shadow 0.2s, transform 0.2s;
-      animation: fadeUp 0.4s ease both;
-    }
-    .kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-    .kpi-card:nth-child(1) { animation-delay: 0.05s; }
-    .kpi-card:nth-child(2) { animation-delay: 0.10s; }
-    .kpi-card:nth-child(3) { animation-delay: 0.15s; }
-    .kpi-card:nth-child(4) { animation-delay: 0.20s; }
-    .kpi-icon {
-      width: 42px; height: 42px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .kpi-icon svg { width: 22px; height: 22px; }
-    .kpi-icon.purple { background: var(--brand-light); color: var(--brand); }
-    .kpi-icon.green  { background: var(--success-bg); color: var(--success); }
-    .kpi-icon.yellow { background: var(--warning-bg); color: var(--warning); }
-    .kpi-icon.blue   { background: #DEECF9; color: #0078D4; }
-    .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; }
-    .kpi-label { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+      /* ── TASK ── */
+      .task-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.15s;
+        cursor: pointer;
+      }
+      .task-item:last-child {
+        border-bottom: none;
+      }
+      .task-item:hover {
+        background: #f7fcf7;
+      }
+      .task-check {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .task-check.done {
+        background: var(--success);
+        border-color: var(--success);
+      }
+      .task-check.done::after {
+        content: "";
+        width: 6px;
+        height: 4px;
+        border-left: 2px solid #fff;
+        border-bottom: 2px solid #fff;
+        transform: rotate(-45deg) translateY(-1px);
+        display: block;
+      }
+      .task-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .task-name {
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .task-name.done {
+        text-decoration: line-through;
+        color: var(--text-muted);
+      }
+      .task-meta {
+        font-size: 11px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+      .priority-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .priority-dot.high {
+        background: #c4314b;
+      }
+      .priority-dot.medium {
+        background: #f4be22;
+      }
+      .priority-dot.low {
+        background: #6bb700;
+      }
 
-    /* ── MAIN GRID ── */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-    .grid-col { display: flex; flex-direction: column; gap: 18px; }
+      /* ── MAIL ── */
+      .mail-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.15s;
+        cursor: pointer;
+      }
+      .mail-item:last-child {
+        border-bottom: none;
+      }
+      .mail-item:hover {
+        background: #f5f8ff;
+      }
+      .mail-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .mail-content {
+        flex: 1;
+        min-width: 0;
+      }
+      .mail-from {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .mail-subject {
+        font-size: 13px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mail-subject.unread {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+      .mail-preview {
+        font-size: 12px;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 2px;
+      }
+      .mail-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+      }
+      .mail-time {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .unread-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--brand);
+      }
 
-    /* ── SECTION CARD ── */
-    .section-card {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-      animation: fadeUp 0.4s ease both;
-    }
-    .section-card:nth-child(1) { animation-delay: 0.22s; }
-    .section-card:nth-child(2) { animation-delay: 0.28s; }
-    .section-card:nth-child(3) { animation-delay: 0.34s; }
-    .section-card:nth-child(4) { animation-delay: 0.40s; }
+      /* ── PRESENCE ── */
+      .presence-section {
+        padding: 20px;
+      }
+      .presence-user {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+      .presence-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--brand);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        position: relative;
+      }
+      .presence-indicator {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+      }
+      .presence-name {
+        font-size: 17px;
+        font-weight: 600;
+      }
+      .presence-role {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+      .presence-status-text {
+        font-size: 13px;
+        margin-top: 2px;
+      }
+      .presence-select label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+      .presence-options {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .presence-opt {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        font-size: 13px;
+        background: #fff;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .presence-opt:hover {
+        border-color: var(--brand);
+        background: var(--brand-light);
+      }
+      .presence-opt.active {
+        border-color: var(--brand);
+        background: var(--brand-light);
+        font-weight: 600;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .dot.available {
+        background: var(--presence-available);
+      }
+      .dot.busy {
+        background: var(--presence-busy);
+      }
+      .dot.away {
+        background: var(--presence-away);
+      }
+      .dot.offline {
+        background: #c0c0c0;
+      }
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 16px 0;
+      }
+      .stats-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .stat-box {
+        background: var(--surface);
+        border-radius: 8px;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+      }
+      .stat-box-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--brand);
+      }
+      .stat-box-label {
+        font-size: 11px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
 
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    .section-header-left {
-      display: flex; align-items: center; gap: 10px;
-    }
-    .section-icon {
-      width: 28px; height: 28px; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .section-icon svg { width: 16px; height: 16px; }
-    .section-icon.purple { background: var(--brand-light); color: var(--brand); }
-    .section-icon.green  { background: var(--success-bg); color: var(--success); }
-    .section-icon.blue   { background: #DEECF9; color: #0078D4; }
-    .section-icon.teal   { background: #E0F5F5; color: #007A7C; }
-    .section-title { font-size: 15px; font-weight: 600; }
-    .badge {
-      font-size: 11px; font-weight: 700;
-      padding: 2px 8px; border-radius: 20px;
-      background: var(--brand); color: #fff;
-    }
-    .section-link {
-      font-size: 12px; color: var(--brand); font-weight: 500;
-      text-decoration: none; cursor: pointer;
-    }
-    .section-link:hover { text-decoration: underline; }
-    .section-body { padding: 4px 0; }
+      /* ── ANIMATIONS ── */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .spinning {
+        animation: spin 0.8s linear infinite;
+      }
 
-    /* ── MEETING ITEM ── */
-    .meeting-item {
-      display: flex; align-items: stretch;
-      padding: 12px 20px;
-      gap: 14px;
-      border-bottom: 1px solid #F0F0F0;
-      transition: background 0.15s;
-      cursor: pointer;
-    }
-    .meeting-item:last-child { border-bottom: none; }
-    .meeting-item:hover { background: #F7F7FC; }
-    .meeting-time-col {
-      width: 56px; flex-shrink: 0;
-      display: flex; flex-direction: column; align-items: flex-end;
-      padding-top: 2px;
-    }
-    .meeting-time { font-size: 12px; font-weight: 600; color: var(--brand); }
-    .meeting-end  { font-size: 11px; color: var(--text-muted); }
-    .meeting-bar {
-      width: 3px; border-radius: 2px; background: var(--brand);
-      margin: 4px 0; align-self: stretch; flex-shrink: 0;
-      min-height: 28px;
-    }
-    .meeting-bar.green { background: var(--presence-available); }
-    .meeting-bar.gray  { background: #C0C0C0; }
-    .meeting-details { flex: 1; min-width: 0; }
-    .meeting-title {
-      font-size: 14px; font-weight: 600;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .meeting-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-    .meeting-chips { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-    .chip {
-      font-size: 11px; padding: 2px 8px; border-radius: 20px;
-      border: 1px solid var(--border); color: var(--text-secondary);
-      background: var(--surface);
-    }
-    .chip.live { background: #C4314B; color: #fff; border-color: transparent; animation: pulse 2s infinite; }
-    .join-btn {
-      align-self: center; flex-shrink: 0;
-      padding: 6px 14px; border-radius: 6px;
-      border: none; background: var(--brand); color: #fff;
-      font-size: 12px; font-weight: 600; cursor: pointer;
-      transition: background 0.15s;
-    }
-    .join-btn:hover { background: var(--brand-dark); }
-    .join-btn.disabled { background: var(--border); color: var(--text-muted); cursor: default; }
-
-    /* ── TASK ITEM ── */
-    .task-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 11px 20px;
-      border-bottom: 1px solid #F0F0F0;
-      transition: background 0.15s;
-      cursor: pointer;
-    }
-    .task-item:last-child { border-bottom: none; }
-    .task-item:hover { background: #F7FCF7; }
-    .task-check {
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 2px solid var(--border); flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .task-check.done { background: var(--success); border-color: var(--success); }
-    .task-check.done::after {
-      content: '';
-      width: 6px; height: 4px;
-      border-left: 2px solid #fff; border-bottom: 2px solid #fff;
-      transform: rotate(-45deg) translateY(-1px);
-      display: block;
-    }
-    .task-info { flex: 1; min-width: 0; }
-    .task-name {
-      font-size: 14px; font-weight: 500;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .task-name.done { text-decoration: line-through; color: var(--text-muted); }
-    .task-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-    .priority-dot {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-    }
-    .priority-dot.high   { background: #C4314B; }
-    .priority-dot.medium { background: #F4BE22; }
-    .priority-dot.low    { background: #6BB700; }
-
-    /* ── MAIL ITEM ── */
-    .mail-item {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 12px 20px;
-      border-bottom: 1px solid #F0F0F0;
-      transition: background 0.15s;
-      cursor: pointer;
-    }
-    .mail-item:last-child { border-bottom: none; }
-    .mail-item:hover { background: #F5F8FF; }
-    .mail-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; color: #fff;
-    }
-    .mail-content { flex: 1; min-width: 0; }
-    .mail-from { font-size: 13px; font-weight: 600; }
-    .mail-subject {
-      font-size: 13px; color: var(--text-secondary);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .mail-subject.unread { color: var(--text-primary); font-weight: 500; }
-    .mail-preview { font-size: 12px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .mail-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-    .mail-time { font-size: 11px; color: var(--text-muted); }
-    .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
-
-    /* ── PRESENCE CARD ── */
-    .presence-section { padding: 20px; }
-    .presence-user {
-      display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
-    }
-    .presence-avatar {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: var(--brand); display: flex; align-items: center; justify-content: center;
-      font-size: 20px; font-weight: 700; color: #fff; flex-shrink: 0;
-      position: relative;
-    }
-    .presence-indicator {
-      width: 14px; height: 14px; border-radius: 50%;
-      border: 2px solid #fff;
-      position: absolute; bottom: 1px; right: 1px;
-    }
-    .presence-name { font-size: 17px; font-weight: 600; }
-    .presence-role { font-size: 13px; color: var(--text-secondary); }
-    .presence-status-text { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
-
-    .presence-select label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500; }
-    .presence-options { display: flex; gap: 8px; flex-wrap: wrap; }
-    .presence-opt {
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 12px; border-radius: 6px;
-      border: 1px solid var(--border); cursor: pointer;
-      font-size: 13px; background: #fff;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .presence-opt:hover { border-color: var(--brand); background: var(--brand-light); }
-    .presence-opt.active { border-color: var(--brand); background: var(--brand-light); font-weight: 600; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .dot.available { background: var(--presence-available); }
-    .dot.busy      { background: var(--presence-busy); }
-    .dot.away      { background: var(--presence-away); }
-    .dot.offline   { background: #C0C0C0; }
-
-    .divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat-box {
-      background: var(--surface); border-radius: 8px; padding: 12px 14px;
-      border: 1px solid var(--border);
-    }
-    .stat-box-value { font-size: 22px; font-weight: 700; color: var(--brand); }
-    .stat-box-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .spinning { animation: spin 0.8s linear infinite; }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
-      .kpi-strip { grid-template-columns: repeat(2, 1fr); }
-      .grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 500px) {
-      .kpi-strip { grid-template-columns: 1fr 1fr; }
-      .greeting-row { flex-direction: column; align-items: flex-start; gap: 12px; }
-    }
-  </style>
-</head>
-<body>
-
-<!-- ══ HEADER ══ -->
-<header>
-  <div class="header-logo">
-    <!-- Teams icon -->
-    <svg viewBox="0 0 22 22" fill="none">
-      <path d="M14 7.5A2.5 2.5 0 1 0 14 2.5 2.5 2.5 0 0 0 14 7.5Z" fill="rgba(255,255,255,0.9)"/>
-      <path d="M19.5 9H13a.5.5 0 0 0-.5.5V15a4 4 0 0 0 4 4 4 4 0 0 0 4-4V9.5a.5.5 0 0 0-.5-.5h-.5Z" fill="rgba(255,255,255,0.9)"/>
-      <path d="M8.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" fill="rgba(255,255,255,0.6)"/>
-      <path d="M11 10H2a1 1 0 0 0-1 1v6a4.5 4.5 0 0 0 4.5 4.5A4.5 4.5 0 0 0 10 17v-6a1 1 0 0 0-1-1h2Z" fill="rgba(255,255,255,0.6)"/>
-    </svg>
-    <span class="header-title">Mi Día</span>
-  </div>
-  <div class="header-spacer"></div>
-  <span class="header-date" id="headerDate"></span>
-  <div class="avatar-btn">MG</div>
-</header>
-
-<!-- ══ MAIN ══ -->
-<main>
-
-  <!-- Greeting -->
-  <div class="greeting-row">
-    <div class="greeting-text">
-      <h1 id="greetingText">Buenos días, María 👋</h1>
-      <p id="greetingSub">Tienes 4 reuniones hoy y 6 tareas pendientes en Planner.</p>
-    </div>
-    <button class="refresh-btn" onclick="refreshData()">
-      <svg id="refreshIcon" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5V1l3 2.5L8 6V4.5A3.5 3.5 0 1 0 11.5 8H13.5Z"/>
-      </svg>
-      Actualizar
-    </button>
-  </div>
-
-  <!-- KPIs -->
-  <div class="kpi-strip">
-    <div class="kpi-card">
-      <div class="kpi-icon purple">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 16H5V10h14v10Zm0-12H5V6h14v2ZM7 12h2v2H7Zm4 0h2v2h-2Zm4 0h2v2h-2Z"/></svg>
-      </div>
-      <div>
-        <div class="kpi-value">4</div>
-        <div class="kpi-label">Reuniones hoy</div>
-      </div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon green">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"/></svg>
-      </div>
-      <div>
-        <div class="kpi-value">3</div>
-        <div class="kpi-label">Tareas completadas</div>
-      </div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon yellow">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2Zm-5 14H7v-2h7v2Zm3-4H7v-2h10v2Zm0-4H7V7h10v2Z"/></svg>
-      </div>
-      <div>
-        <div class="kpi-value">6</div>
-        <div class="kpi-label">Tareas pendientes</div>
-      </div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon blue">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>
-      </div>
-      <div>
-        <div class="kpi-value">5</div>
-        <div class="kpi-label">Correos sin leer</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Grid -->
-  <div class="grid">
-    <div class="grid-col">
-
-      <!-- Meetings -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-header-left">
-            <div class="section-icon purple">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4Z"/></svg>
-            </div>
-            <span class="section-title">Reuniones de hoy</span>
-            <span class="badge">4</span>
-          </div>
-          <a class="section-link">Ver calendario →</a>
+      /* ── RESPONSIVE ── */
+      @media (max-width: 900px) {
+        .kpi-strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 500px) {
+        .greeting-row {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .login-card {
+          width: 90%;
+          padding: 36px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ════════════════════════ LOGIN ════════════════════════ -->
+    <div id="loginScreen">
+      <div class="login-card">
+        <div class="login-logo">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path
+              d="M20 11A3.5 3.5 0 1 0 20 4a3.5 3.5 0 0 0 0 7Z"
+              fill="rgba(255,255,255,0.9)"
+            />
+            <path
+              d="M27.5 13H19a.5.5 0 0 0-.5.5V21a5.5 5.5 0 0 0 11 0v-7.5a.5.5 0 0 0-.5-.5h-.5Z"
+              fill="rgba(255,255,255,0.9)"
+            />
+            <path
+              d="M11.5 11A3.5 3.5 0 1 0 11.5 4a3.5 3.5 0 0 0 0 7Z"
+              fill="rgba(255,255,255,0.55)"
+            />
+            <path
+              d="M15 14H4a1 1 0 0 0-1 1v8a6 6 0 0 0 12 0v-8a1 1 0 0 0-1-1h1Z"
+              fill="rgba(255,255,255,0.55)"
+            />
+          </svg>
         </div>
-        <div class="section-body" id="meetingsList"></div>
+        <h2>Mi Día · Teams</h2>
+        <p>
+          Inicia sesión con tu cuenta Microsoft para ver reuniones, tareas y
+          correos del día.
+        </p>
+        <button class="login-btn" onclick="doLogin()">
+          <svg viewBox="0 0 21 21" fill="none">
+            <rect x="1" y="1" width="9" height="9" fill="#F35325" />
+            <rect x="11" y="1" width="9" height="9" fill="#81BC06" />
+            <rect x="1" y="11" width="9" height="9" fill="#05A6F0" />
+            <rect x="11" y="11" width="9" height="9" fill="#FFBA08" />
+          </svg>
+          Continuar con Microsoft
+        </button>
+        <button class="login-btn demo" onclick="enterDemoMode()">
+          ▶ Ver demo (datos de ejemplo)
+        </button>
+        <div class="login-error" id="loginError"></div>
+        <p class="login-note">
+          Solo se accede a tu calendario, tareas y correo.<br />Tus datos no se
+          almacenan externamente.
+        </p>
       </div>
-
-      <!-- Mail -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-header-left">
-            <div class="section-icon blue">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>
-            </div>
-            <span class="section-title">Correos importantes</span>
-            <span class="badge">5</span>
-          </div>
-          <a class="section-link">Ver Outlook →</a>
-        </div>
-        <div class="section-body" id="mailList"></div>
-      </div>
-
     </div>
-    <div class="grid-col">
 
-      <!-- Tasks -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-header-left">
-            <div class="section-icon green">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"/></svg>
-            </div>
-            <span class="section-title">Planner · Tareas de hoy</span>
-            <span class="badge">9</span>
-          </div>
-          <a class="section-link">Ver Planner →</a>
-        </div>
-        <div class="section-body" id="tasksList"></div>
+    <!-- ════════════════════════ LOADING ════════════════════════ -->
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <p id="loadingText">Cargando tus datos…</p>
+    </div>
+
+    <!-- ════════════════════════ APP ════════════════════════ -->
+    <div id="appShell">
+      <!-- Config banner -->
+      <div id="configBanner">
+        ⚠️ <strong>Configuración pendiente:</strong> Edita el archivo y
+        reemplaza <code>TU_CLIENT_ID_AQUI</code> y
+        <code>TU_TENANT_ID_AQUI</code> — se muestran
+        <strong>datos de ejemplo</strong>.
       </div>
 
-      <!-- Presence -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-header-left">
-            <div class="section-icon teal">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12Zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8Z"/></svg>
+      <!-- Header -->
+      <header>
+        <div class="header-logo">
+          <svg viewBox="0 0 22 22" fill="none">
+            <path
+              d="M14 7.5A2.5 2.5 0 1 0 14 2.5 2.5 2.5 0 0 0 14 7.5Z"
+              fill="rgba(255,255,255,0.9)"
+            />
+            <path
+              d="M19.5 9H13a.5.5 0 0 0-.5.5V15a4 4 0 0 0 8 0V9.5a.5.5 0 0 0-.5-.5Z"
+              fill="rgba(255,255,255,0.9)"
+            />
+            <path
+              d="M8.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+              fill="rgba(255,255,255,0.6)"
+            />
+            <path
+              d="M11 10H2a1 1 0 0 0-1 1v6a4.5 4.5 0 0 0 9 0v-6a1 1 0 0 0-1-1h1Z"
+              fill="rgba(255,255,255,0.6)"
+            />
+          </svg>
+          <span class="header-title">Mi Día</span>
+        </div>
+        <div class="header-spacer"></div>
+        <span class="header-date" id="headerDate"></span>
+        <div class="avatar-btn" id="avatarBtn" onclick="toggleMenu()">
+          <span id="avatarInitials">?</span>
+          <div class="logout-menu" id="logoutMenu">
+            <div class="lm-name" id="menuName">—</div>
+            <div class="lm-email" id="menuEmail">—</div>
+            <div class="lm-btn" onclick="doLogout()">
+              <svg
+                viewBox="0 0 24 24"
+                width="15"
+                height="15"
+                fill="currentColor"
+              >
+                <path
+                  d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+                />
+              </svg>
+              Cerrar sesión
             </div>
-            <span class="section-title">Mi presencia</span>
           </div>
         </div>
-        <div class="presence-section">
-          <div class="presence-user">
-            <div class="presence-avatar">
-              MG
-              <div class="presence-indicator" id="presenceIndicator" style="background: var(--presence-available)"></div>
+      </header>
+
+      <main>
+        <!-- Greeting -->
+        <div class="greeting-row">
+          <div class="greeting-text">
+            <h1 id="greetingText">Cargando…</h1>
+            <p id="greetingSub"></p>
+          </div>
+          <button class="refresh-btn" onclick="loadAllData()">
+            <svg id="refreshIcon" viewBox="0 0 16 16" fill="currentColor">
+              <path
+                d="M13.5 8A5.5 5.5 0 1 1 8 2.5V1l3 2.5L8 6V4.5A3.5 3.5 0 1 0 11.5 8H13.5Z"
+              />
+            </svg>
+            Actualizar
+          </button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-strip">
+          <div class="kpi-card">
+            <div class="kpi-icon purple">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 16H5V10h14v10Zm0-12H5V6h14v2ZM7 12h2v2H7Zm4 0h2v2h-2Zm4 0h2v2h-2Z"
+                />
+              </svg>
             </div>
             <div>
-              <div class="presence-name">María González</div>
-              <div class="presence-role">Diseñadora UX · Equipo Digital</div>
-              <div class="presence-status-text" id="presenceStatusText">🟢 Disponible</div>
+              <div class="kpi-value" id="kpiMeetings">—</div>
+              <div class="kpi-label">Reuniones hoy</div>
             </div>
           </div>
-          <div class="presence-select">
-            <label>Cambiar estado</label>
-            <div class="presence-options">
-              <div class="presence-opt active" onclick="setPresence(this,'available','#6BB700','🟢 Disponible')">
-                <div class="dot available"></div> Disponible
-              </div>
-              <div class="presence-opt" onclick="setPresence(this,'busy','#C4314B','🔴 Ocupada')">
-                <div class="dot busy"></div> Ocupada
-              </div>
-              <div class="presence-opt" onclick="setPresence(this,'away','#F4BE22','🟡 Ausente')">
-                <div class="dot away"></div> Ausente
-              </div>
-              <div class="presence-opt" onclick="setPresence(this,'offline','#C0C0C0','⚫ No disponible')">
-                <div class="dot offline"></div> No disponible
-              </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"
+                />
+              </svg>
+            </div>
+            <div>
+              <div class="kpi-value" id="kpiDone">—</div>
+              <div class="kpi-label">Tareas completadas</div>
             </div>
           </div>
-          <div class="divider"></div>
-          <div class="stats-row">
-            <div class="stat-box">
-              <div class="stat-box-value">2h 40m</div>
-              <div class="stat-box-label">En reuniones hoy</div>
+          <div class="kpi-card">
+            <div class="kpi-icon yellow">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2Zm-5 14H7v-2h7v2Zm3-4H7v-2h10v2Zm0-4H7V7h10v2Z"
+                />
+              </svg>
             </div>
-            <div class="stat-box">
-              <div class="stat-box-value">11</div>
-              <div class="stat-box-label">Chats activos</div>
+            <div>
+              <div class="kpi-value" id="kpiPending">—</div>
+              <div class="kpi-label">Tareas pendientes</div>
             </div>
-            <div class="stat-box">
-              <div class="stat-box-value">83%</div>
-              <div class="stat-box-label">Tareas completadas esta semana</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon blue">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"
+                />
+              </svg>
             </div>
-            <div class="stat-box">
-              <div class="stat-box-value">3</div>
-              <div class="stat-box-label">Menciones sin ver</div>
+            <div>
+              <div class="kpi-value" id="kpiMail">—</div>
+              <div class="kpi-label">Correos sin leer</div>
             </div>
           </div>
         </div>
-      </div>
 
+        <!-- Grid -->
+        <div class="grid">
+          <div class="grid-col">
+            <!-- Reuniones -->
+            <div class="section-card">
+              <div class="section-header">
+                <div class="section-header-left">
+                  <div class="section-icon purple">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4Z"
+                      />
+                    </svg>
+                  </div>
+                  <span class="section-title">Reuniones de hoy</span>
+                  <span class="badge" id="badgeMeetings">0</span>
+                </div>
+                <a
+                  class="section-link"
+                  href="https://teams.microsoft.com"
+                  target="_blank"
+                  >Ver calendario →</a
+                >
+              </div>
+              <div class="section-body" id="meetingsList">
+                <div class="empty-state">Cargando…</div>
+              </div>
+            </div>
+            <!-- Correos -->
+            <div class="section-card">
+              <div class="section-header">
+                <div class="section-header-left">
+                  <div class="section-icon blue">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"
+                      />
+                    </svg>
+                  </div>
+                  <span class="section-title">Correos importantes</span>
+                  <span class="badge" id="badgeMail">0</span>
+                </div>
+                <a
+                  class="section-link"
+                  href="https://outlook.office.com"
+                  target="_blank"
+                  >Ver Outlook →</a
+                >
+              </div>
+              <div class="section-body" id="mailList">
+                <div class="empty-state">Cargando…</div>
+              </div>
+            </div>
+          </div>
+          <div class="grid-col">
+            <!-- Tareas -->
+            <div class="section-card">
+              <div class="section-header">
+                <div class="section-header-left">
+                  <div class="section-icon green">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"
+                      />
+                    </svg>
+                  </div>
+                  <span class="section-title">Planner · Mis tareas</span>
+                  <span class="badge" id="badgeTasks">0</span>
+                </div>
+                <a
+                  class="section-link"
+                  href="https://tasks.office.com"
+                  target="_blank"
+                  >Ver Planner →</a
+                >
+              </div>
+              <div class="section-body" id="tasksList">
+                <div class="empty-state">Cargando…</div>
+              </div>
+            </div>
+            <!-- Presencia -->
+            <div class="section-card">
+              <div class="section-header">
+                <div class="section-header-left">
+                  <div class="section-icon teal">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12Zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8Z"
+                      />
+                    </svg>
+                  </div>
+                  <span class="section-title">Mi presencia</span>
+                </div>
+              </div>
+              <div class="presence-section">
+                <div class="presence-user">
+                  <div class="presence-avatar">
+                    <span id="presenceAvatarText">?</span>
+                    <div
+                      class="presence-indicator"
+                      id="presenceIndicator"
+                      style="background: #c0c0c0"
+                    ></div>
+                  </div>
+                  <div>
+                    <div class="presence-name" id="presenceName">—</div>
+                    <div class="presence-role" id="presenceRole"></div>
+                    <div class="presence-status-text" id="presenceStatusText">
+                      ⚫ Desconocido
+                    </div>
+                  </div>
+                </div>
+                <div class="presence-select">
+                  <label>Cambiar estado</label>
+                  <div class="presence-options">
+                    <div
+                      class="presence-opt"
+                      onclick="setPresence(this, '#6BB700', '🟢 Disponible')"
+                    >
+                      <div class="dot available"></div>
+                      Disponible
+                    </div>
+                    <div
+                      class="presence-opt"
+                      onclick="setPresence(this, '#C4314B', '🔴 Ocupado')"
+                    >
+                      <div class="dot busy"></div>
+                      Ocupado
+                    </div>
+                    <div
+                      class="presence-opt"
+                      onclick="setPresence(this, '#F4BE22', '🟡 Ausente')"
+                    >
+                      <div class="dot away"></div>
+                      Ausente
+                    </div>
+                    <div
+                      class="presence-opt"
+                      onclick="setPresence(this, '#C0C0C0', '⚫ No disponible')"
+                    >
+                      <div class="dot offline"></div>
+                      No disponible
+                    </div>
+                  </div>
+                </div>
+                <div class="divider"></div>
+                <div class="stats-row">
+                  <div class="stat-box">
+                    <div class="stat-box-value" id="statMeetTime">—</div>
+                    <div class="stat-box-label">En reuniones hoy</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-box-value" id="statDone">—</div>
+                    <div class="stat-box-label">Tareas completadas</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-box-value" id="statPend">—</div>
+                    <div class="stat-box-label">Tareas pendientes</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-box-value" id="statUnread">—</div>
+                    <div class="stat-box-label">Correos sin leer</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-  </div>
-</main>
+    <!-- /appShell -->
 
-<script>
-  // ── MOCK DATA ──
-  const NOW = new Date();
-  const HOUR = NOW.getHours();
-  const MINUTE = NOW.getMinutes();
+    <script>
+      /* ══════════════════════════════════════════════════════
+   CONFIGURACIÓN SEGURA SPA – GITHUB PAGES
+══════════════════════════════════════════════════════ */
 
-  function pad(n) { return String(n).padStart(2,'0'); }
-  function timeStr(h,m) { return `${pad(h)}:${pad(m)}`; }
-  function isLive(startH,startM,durMin) {
-    const start = startH*60+startM, end = start+durMin, cur = HOUR*60+MINUTE;
-    return cur >= start && cur < end;
-  }
-  function isPast(startH,startM,durMin) {
-    return (HOUR*60+MINUTE) >= startH*60+startM+durMin;
-  }
+      const ALLOWED_HOST = "pauibz.github.io";
+      const ALLOWED_PATH_PREFIX = "/TestTeams"; 
 
-  const meetings = [
-    { title:"Daily Stand-up · Equipo Digital", organizer:"Pedro Ruiz", time:[9,0], dur:30, attendees:8, channel:"Equipo Digital" },
-    { title:"Revisión de diseño Q2 · App móvil", organizer:"Laura Sánchez", time:[10,30], dur:60, attendees:5, channel:"Diseño" },
-    { title:"Sync con cliente · Proyecto Atenea", organizer:"Carlos López", time:[12,0], dur:45, attendees:12, channel:"Proyecto Atenea" },
-    { title:"Retrospectiva Sprint 14", organizer:"Ana Martínez", time:[16,0], dur:60, attendees:9, channel:"Equipo Digital" },
-  ];
+      if (
+        location.hostname !== ALLOWED_HOST ||
+        !location.pathname.startsWith(ALLOWED_PATH_PREFIX)
+      ) {
+        document.body.innerHTML = "<h2>Acceso no autorizado</h2>";
+        throw new Error("Dominio o ruta no autorizados");
+      }
 
-  const tasks = [
-    { name:"Revisar mockups pantalla de inicio", bucket:"Sprint 14", priority:"high",   done:false },
-    { name:"Actualizar documentación de componentes", bucket:"Docs", priority:"medium", done:false },
-    { name:"Preparar agenda reunión con cliente", bucket:"Proyecto Atenea", priority:"high",   done:true  },
-    { name:"Enviar informe de accesibilidad", bucket:"Calidad", priority:"medium", done:false },
-    { name:"Pruebas de usabilidad – flujo checkout", bucket:"QA", priority:"low",    done:false },
-    { name:"Responder feedback de Pedro sobre el DS", bucket:"Design System", priority:"medium", done:false },
-    { name:"Cerrar issues del Sprint 13", bucket:"Sprint 13", priority:"low",    done:true  },
-    { name:"Revisar propuesta de color tokens", bucket:"Design System", priority:"medium", done:true  },
-    { name:"Reunión kick-off Proyecto Hermes", bucket:"Proyecto Hermes", priority:"high",   done:false },
-  ];
+      // Protección básica contra clickjacking adicional
+      if (window.top !== window.self) {
+        window.top.location = window.self.location;
+      }
 
-  const mails = [
-    { from:"Laura Sánchez", initials:"LS", color:"#6264A7", subject:"Re: Revisión de los nuevos componentes del DS", preview:"He revisado los últimos cambios y me parecen muy bien...", time:"09:14", unread:true },
-    { from:"Pedro Ruiz",    initials:"PR", color:"#0078D4", subject:"Feedback sprint review – acciones pendientes", preview:"Tras la reunión del viernes quedan estos puntos abiertos...", time:"08:47", unread:true },
-    { from:"Ana Martínez",  initials:"AM", color:"#107C10", subject:"Retrospectiva hoy a las 16:00 – agenda adjunta",  preview:"Os comparto la agenda de la retro de hoy para que podáis...", time:"08:30", unread:true },
-    { from:"Carlos López",  initials:"CL", color:"#C4314B", subject:"Confirmación reunión cliente Atenea – hoy 12h",   preview:"Confirmo la reunión con Inmobiliaria Atenea para las 12:00.", time:"Ayer",  unread:false },
-    { from:"RRHH · Empresa",initials:"RH", color:"#8A5A00", subject:"Política de teletrabajo actualizada – léeme",     preview:"A partir del próximo mes entra en vigor la nueva política...", time:"Ayer",  unread:true },
-  ];
+      const CLIENT_ID = "c6219253-8f6e-48c9-8c4a-766aea58a874";
+      const TENANT_ID = "a3cdf8f7-40db-4d0f-8ccb-82310428392a";
 
-  // ── RENDER MEETINGS ──
-  function renderMeetings() {
-    const el = document.getElementById('meetingsList');
-    el.innerHTML = meetings.map(m => {
-      const [h,min] = m.time;
-      const endH = Math.floor((h*60+min+m.dur)/60);
-      const endM = (h*60+min+m.dur)%60;
-      const live = isLive(h,min,m.dur);
-      const past = isPast(h,min,m.dur);
-      const barClass = live ? 'green' : past ? 'gray' : '';
-      const joinClass = (live ? '' : past ? 'disabled' : '');
-      return `
-        <div class="meeting-item">
-          <div class="meeting-time-col">
-            <span class="meeting-time">${timeStr(h,min)}</span>
-            <span class="meeting-end">${timeStr(endH,endM)}</span>
-          </div>
-          <div class="meeting-bar ${barClass}"></div>
-          <div class="meeting-details">
-            <div class="meeting-title">${m.title}</div>
-            <div class="meeting-sub">${m.organizer} · ${m.attendees} asistentes</div>
-            <div class="meeting-chips">
-              ${live ? '<span class="chip live">● En directo</span>' : ''}
-              <span class="chip">${m.channel}</span>
-              <span class="chip">${m.dur} min</span>
-            </div>
-          </div>
-          <button class="join-btn ${joinClass}" ${past ? 'disabled' : ''}>${past ? 'Finalizada' : live ? 'Unirse' : 'Unirse'}</button>
-        </div>`;
-    }).join('');
-  }
+      const CONFIGURED =
+        CLIENT_ID !== "c6219253-8f6e-48c9-8c4a-766aea58a874" && TENANT_ID !== "a3cdf8f7-40db-4d0f-8ccb-82310428392a";
 
-  // ── RENDER TASKS ──
-  function renderTasks() {
-    const el = document.getElementById('tasksList');
-    el.innerHTML = tasks.map((t,i) => `
-      <div class="task-item" onclick="toggleTask(${i})">
-        <div class="task-check ${t.done ? 'done' : ''}"></div>
-        <div class="task-info">
-          <div class="task-name ${t.done ? 'done' : ''}">${t.name}</div>
-          <div class="task-meta">${t.bucket}</div>
-        </div>
-        <div class="priority-dot ${t.priority}" title="Prioridad ${t.priority}"></div>
-      </div>`).join('');
-  }
+      if (!CONFIGURED) {
+        console.warn("App no configurada.");
+      }
 
-  function toggleTask(i) {
-    tasks[i].done = !tasks[i].done;
-    renderTasks();
-    // update KPI
-    document.querySelector('.kpi-strip .kpi-card:nth-child(2) .kpi-value').textContent =
-      tasks.filter(t=>t.done).length;
-    document.querySelector('.kpi-strip .kpi-card:nth-child(3) .kpi-value').textContent =
-      tasks.filter(t=>!t.done).length;
-    document.querySelector('.greeting-text p').textContent =
-      `Tienes 4 reuniones hoy y ${tasks.filter(t=>!t.done).length} tareas pendientes en Planner.`;
-  }
+      const msalConfig = {
+        auth: {
+          clientId: CLIENT_ID,
+          authority: `https://login.microsoftonline.com/${TENANT_ID}`,
+          redirectUri: window.location.origin + ALLOWED_PATH_PREFIX,
+          navigateToLoginRequestUrl: false,
+        },
+        cache: {
+          cacheLocation: "sessionStorage",
+          storeAuthStateInCookie: false,
+        },
+      };
 
-  // ── RENDER MAIL ──
-  function renderMail() {
-    const el = document.getElementById('mailList');
-    el.innerHTML = mails.map(m => `
-      <div class="mail-item">
-        <div class="mail-avatar" style="background:${m.color}">${m.initials}</div>
-        <div class="mail-content">
-          <div class="mail-from">${m.from}</div>
-          <div class="mail-subject ${m.unread ? 'unread' : ''}">${m.subject}</div>
-          <div class="mail-preview">${m.preview}</div>
-        </div>
-        <div class="mail-right">
-          <span class="mail-time">${m.time}</span>
-          ${m.unread ? '<div class="unread-dot"></div>' : ''}
-        </div>
-      </div>`).join('');
-  }
+      const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-  // ── PRESENCE ──
-  function setPresence(el, state, color, label) {
-    document.querySelectorAll('.presence-opt').forEach(o => o.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('presenceIndicator').style.background = color;
-    document.getElementById('presenceStatusText').textContent = label;
-  }
+      const SCOPES = [
+        "User.Read",
+        "Calendars.Read",
+        "Tasks.ReadWrite",
+        "Mail.Read",
+        "Presence.Read",
+      ];
 
-  // ── GREETING ──
-  function renderGreeting() {
-    const h = HOUR;
-    const g = h < 12 ? 'Buenos días' : h < 14 ? 'Buenas tardes' : h < 21 ? 'Buenas tardes' : 'Buenas noches';
-    document.getElementById('greetingText').textContent = `${g}, María 👋`;
-  }
+      /* ══════════════════════════════════════════════════════
+   SANITIZADOR BÁSICO (ANTI XSS)
+══════════════════════════════════════════════════════ */
 
-  // ── HEADER DATE ──
-  function renderDate() {
-    const days = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-    const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-    const d = new Date();
-    document.getElementById('headerDate').textContent =
-      `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]} de ${d.getFullYear()}`;
-  }
+      function sanitize(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
 
-  // ── REFRESH ──
-  function refreshData() {
-    const icon = document.getElementById('refreshIcon');
-    icon.classList.add('spinning');
-    setTimeout(() => {
-      icon.classList.remove('spinning');
-      renderMeetings();
-      renderTasks();
-      renderMail();
-    }, 800);
-  }
+      /* ══════════════════════════════════════════════════════
+   TOKEN
+══════════════════════════════════════════════════════ */
 
-  // ── INIT ──
-  renderGreeting();
-  renderDate();
-  renderMeetings();
-  renderTasks();
-  renderMail();
-</script>
-</body>
+      async function getToken() {
+        let account = msalInstance.getAllAccounts()[0];
+
+        if (!account) {
+          const loginResponse = await msalInstance.loginPopup({
+            scopes: SCOPES,
+            prompt: "select_account",
+          });
+          account = loginResponse.account;
+        }
+
+        const tokenResponse = await msalInstance.acquireTokenSilent({
+          scopes: SCOPES,
+          account: account,
+        });
+
+        return tokenResponse.accessToken;
+      }
+
+      /* ══════════════════════════════════════════════════════
+   GRAPH CALL
+══════════════════════════════════════════════════════ */
+
+      async function callGraph(endpoint, token) {
+        const res = await fetch(`https://graph.microsoft.com/v1.0${endpoint}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          mode: "cors",
+          credentials: "omit",
+        });
+
+        if (!res.ok) {
+          throw new Error("Graph API error: " + res.status);
+        }
+
+        const data = await res.json();
+        if (!data) throw new Error("Respuesta inválida de Graph");
+
+        return data;
+      }
+
+      /* ══════════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════════ */
+
+      async function doLogin() {
+        if (!CONFIGURED) {
+          showError("Configura CLIENT_ID y TENANT_ID.");
+          return;
+        }
+
+        try {
+          showLoading("Iniciando sesión...");
+          await msalInstance.loginPopup({ scopes: SCOPES });
+          showApp();
+          await loadAllData();
+        } catch (e) {
+          hideLoading();
+          showError("Error de autenticación.");
+          console.error(e);
+        }
+      }
+
+      function doLogout() {
+        msalInstance.logoutPopup();
+        sessionStorage.clear();
+        location.reload();
+      }
+
+      /* ══════════════════════════════════════════════════════
+   CARGA DATOS
+══════════════════════════════════════════════════════ */
+
+      async function loadAllData() {
+        if (!CONFIGURED) return;
+
+        showLoading("Cargando datos...");
+
+        try {
+          const token = await getToken();
+
+          const today = new Date().toISOString().split("T")[0];
+
+          const [me, cal, tasks, mail, pres] = await Promise.all([
+            callGraph("/me", token),
+            callGraph(
+              `/me/calendarView?startDateTime=${today}T00:00:00&endDateTime=${today}T23:59:59`,
+              token,
+            ),
+            callGraph("/me/planner/tasks", token),
+            callGraph(
+              "/me/messages?$top=5&$orderby=receivedDateTime desc",
+              token,
+            ),
+            callGraph("/me/presence", token),
+          ]);
+
+          updateUserUI({
+            displayName: sanitize(me.displayName),
+            jobTitle: sanitize(me.jobTitle),
+            mail: sanitize(me.mail),
+          });
+
+          renderMeetings(cal.value || []);
+          renderTasks(tasks.value || []);
+          renderMail(mail.value || []);
+          if (pres?.availability) applyPresence(pres.availability);
+
+          updateKPIs(
+            cal.value?.length || 0,
+            tasks.value || [],
+            mail.value || [],
+          );
+        } catch (err) {
+          console.error(err);
+          showError("Error cargando datos.");
+        }
+
+        hideLoading();
+      }
+
+      /* ══════════════════════════════════════════════════════
+   AUTOLOGIN
+══════════════════════════════════════════════════════ */
+
+      (async () => {
+        if (!CONFIGURED) return;
+
+        try {
+          await msalInstance.handleRedirectPromise();
+          const accounts = msalInstance.getAllAccounts();
+          if (accounts.length > 0) {
+            showApp();
+            await loadAllData();
+          }
+        } catch (e) {
+          console.warn(e);
+        }
+      })();
+    </script>
+  </body>
 </html>
