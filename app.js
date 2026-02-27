@@ -17,6 +17,7 @@ const SCOPES = [
   'Presence.Read.All',
   'People.Read',
   'User.ReadBasic.All',
+  'Presence.ReadWrite',
 ];
 
 /* ================================================================
@@ -54,13 +55,31 @@ const msalInstance = new msal.PublicClientApplication({
     clientId: CONFIG.clientId,
     authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
     redirectUri: window.location.origin + window.location.pathname,
+    navigateToLoginRequestUrl: true,
   },
-  cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: true },
+  cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
+  system: {
+    allowNativeBroker: false,
+    windowHashTimeout: 9000,
+    iframeHashTimeout: 9000,
+    loadFrameTimeout: 9000,
+  },
 });
 
 let currentAccount = null;
 let _cachedToken   = null;
 let _tokenExpiry   = 0;
+
+// Detectar si popups estan bloqueados (Teams Desktop, IE, algunos browsers)
+function canUsePopup() {
+  if (_inTeams) return false; // Teams Desktop bloquea popups
+  try {
+    const test = window.open('', '_blank', 'width=1,height=1');
+    if (!test) return false;
+    test.close();
+    return true;
+  } catch { return false; }
+}
 
 /* ================================================================
    TOKEN — cached, renovacion automatica
@@ -70,39 +89,33 @@ async function getToken() {
     return _cachedToken;
   }
 
-  if (_inTeams) {
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length) {
-      currentAccount = accounts[0];
-      try {
-        const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
-        _cachedToken = r.accessToken;
-        _tokenExpiry = r.expiresOn?.getTime() || (Date.now() + 3600000);
-        return _cachedToken;
-      } catch { /* fall through */ }
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length) {
+    currentAccount = accounts[0];
+    try {
+      const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
+      _cachedToken = r.accessToken;
+      _tokenExpiry = r.expiresOn?.getTime() || (Date.now() + 3600000);
+      return _cachedToken;
+    } catch (silentErr) {
+      console.warn('[Token] Silent failed:', silentErr.errorCode);
+      // Si el error es interaccion requerida, lanzar flujo interactivo
+      if (!silentErr.errorCode?.includes('interaction_required') &&
+          !silentErr.errorCode?.includes('consent_required') &&
+          !silentErr.errorCode?.includes('login_required')) {
+        throw silentErr;
+      }
     }
-    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
-    currentAccount = r.account;
-    _cachedToken = r.accessToken;
-    _tokenExpiry = r.expiresOn?.getTime() || (Date.now() + 3600000);
-    return _cachedToken;
+  } else if (accounts.length === 0 && !_inTeams) {
+    throw new Error('Sin sesion activa');
   }
 
-  const accounts = msalInstance.getAllAccounts();
-  if (!accounts.length) throw new Error('Sin sesion activa');
-  currentAccount = accounts[0];
-  try {
-    const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
-    _cachedToken = r.accessToken;
-    _tokenExpiry = r.expiresOn?.getTime() || (Date.now() + 3600000);
-    return _cachedToken;
-  } catch {
-    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
-    currentAccount = r.account;
-    _cachedToken = r.accessToken;
-    _tokenExpiry = r.expiresOn?.getTime() || (Date.now() + 3600000);
-    return _cachedToken;
-  }
+  // Flujo interactivo: redirect (funciona en Teams Desktop y browsers con popups bloqueados)
+  // Guardar estado para saber que volvemos de un redirect de token
+  sessionStorage.setItem('msal_token_redirect_pending', '1');
+  await msalInstance.acquireTokenRedirect({ scopes: SCOPES, account: currentAccount || undefined });
+  // acquireTokenRedirect navega la pagina — el codigo despues de esta linea no se ejecuta
+  throw new Error('Redirigiendo para autenticacion...');
 }
 
 /* ================================================================
@@ -147,13 +160,11 @@ async function doLogin() {
     if (_inTeams) {
       showApp();
       await loadAllData();
-    } else {
-      const r = await msalInstance.loginPopup({ scopes: SCOPES });
-      currentAccount = r.account;
-      _cachedToken = null;
-      showApp();
-      await loadAllData();
+      return;
     }
+    // Siempre usar redirect — funciona en Teams Desktop, browsers con popups bloqueados y browser normal
+    await msalInstance.loginRedirect({ scopes: SCOPES });
+    // loginRedirect navega la pagina, el codigo de abajo no se ejecuta durante el login
   } catch (e) {
     hideLoading();
     showError('Error al iniciar sesion: ' + (e.message || 'Intentalo de nuevo.'));
@@ -173,7 +184,7 @@ function doLogout() {
     document.getElementById('appShell').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
   } else {
-    msalInstance.logoutPopup();
+    msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.origin + window.location.pathname });
   }
 }
 
@@ -572,6 +583,16 @@ function syncMyPresenceUI(availability) {
   }
 }
 
+// Mapa availability -> activity valido en Graph API
+const PRESENCE_ACTIVITY_MAP = {
+  Available:    'Available',
+  Busy:         'Busy',
+  DoNotDisturb: 'DoNotDisturb',
+  BeRightBack:  'BeRightBack',
+  Away:         'Away',
+  Offline:      'OffWork',
+};
+
 async function setMyPresence(el, availability, color, label) {
   document.querySelectorAll('.presence-opt').forEach(o => o.classList.remove('active'));
   el.classList.add('active');
@@ -583,21 +604,57 @@ async function setMyPresence(el, availability, color, label) {
   if (mppDot)    mppDot.style.background = color;
   if (mppStatus) mppStatus.textContent   = label;
 
+  let token;
   try {
-    const token = await getToken();
-    await callGraph('/me/presence/setPresence', token, {
-      method: 'POST',
-      body: {
-        sessionId:           CONFIG.clientId,
-        availability,
-        activity:            availability,
-        expirationDuration:  'PT1H',
-      },
-    });
-    showToast('Estado actualizado: ' + label);
+    token = await getToken();
   } catch (err) {
-    console.warn('[Presence] No se pudo escribir presencia en Graph:', err.message);
-    showToast('Estado cambiado localmente. Graph requiere Presence.ReadWrite delegado.');
+    showToast('No se pudo obtener token: ' + err.message);
+    return;
+  }
+
+  // Verificar que el token tiene el scope Presence.ReadWrite
+  // Graph: POST /me/presence/setPresence
+  // Requiere: Presence.ReadWrite (delegated) — sin admin consent
+  const activity = PRESENCE_ACTIVITY_MAP[availability] || 'Available';
+
+  try {
+    const res = await fetch('https://graph.microsoft.com/v1.0/me/presence/setPresence', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sessionId:          CONFIG.clientId,
+        availability:       availability,
+        activity:           activity,
+        expirationDuration: 'PT4H',
+      }),
+    });
+
+    if (res.status === 204 || res.ok) {
+      showToast('Estado actualizado en Teams: ' + label);
+      return;
+    }
+
+    // Leer error detallado
+    let errDetail = `HTTP ${res.status}`;
+    try {
+      const errJson = await res.json();
+      errDetail = errJson?.error?.message || errJson?.error?.code || errDetail;
+      console.warn('[Presence Write] Error:', errJson);
+    } catch { /* ignore */ }
+
+    // 403 = falta permiso Presence.ReadWrite en Azure
+    if (res.status === 403) {
+      showToast('Sin permiso de escritura. Contacta al admin para conceder Presence.ReadWrite');
+    } else {
+      showToast('Error al actualizar: ' + errDetail);
+    }
+
+  } catch (err) {
+    console.error('[Presence Write] Fetch error:', err);
+    showToast('Error de red al actualizar presencia');
   }
 }
 
@@ -1106,7 +1163,7 @@ document.addEventListener('click', e => {
    INIT
 ================================================================ */
 (async () => {
-  // Mostrar login de inmediato — no esperar nada
+  // Mostrar login de inmediato
   document.getElementById('loginScreen').style.display = 'flex';
 
   await initTeams();
@@ -1119,19 +1176,40 @@ document.addEventListener('click', e => {
     return;
   }
 
+  // SIEMPRE llamar handleRedirectPromise primero — captura el token tras volver del redirect de login
+  let redirectResult = null;
   try {
-    await msalInstance.handleRedirectPromise();
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-      currentAccount = accounts[0];
-      document.getElementById('loginScreen').style.display = 'none';
-      showApp();
-      showLoading('Recuperando tu sesion...');
-      await loadAllData();
-      return;
-    }
+    redirectResult = await msalInstance.handleRedirectPromise();
   } catch (e) {
-    console.warn('Error al recuperar sesion:', e);
+    console.warn('[MSAL] handleRedirectPromise error:', e);
+    showError('Error al procesar autenticacion: ' + e.message);
   }
-  // Sin sesion: login screen ya visible, nada mas que hacer
+
+  if (redirectResult?.account) {
+    // Acabamos de volver de un loginRedirect o acquireTokenRedirect — tenemos cuenta
+    currentAccount = redirectResult.account;
+    if (redirectResult.accessToken) {
+      _cachedToken = redirectResult.accessToken;
+      _tokenExpiry = redirectResult.expiresOn?.getTime() || (Date.now() + 3600000);
+    }
+    document.getElementById('loginScreen').style.display = 'none';
+    showApp();
+    showLoading('Cargando tu espacio de trabajo...');
+    await loadAllData();
+    return;
+  }
+
+  // Buscar cuenta existente en cache
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    currentAccount = accounts[0];
+    document.getElementById('loginScreen').style.display = 'none';
+    showApp();
+    showLoading('Recuperando tu sesion...');
+    await loadAllData();
+    return;
+  }
+
+  // Sin sesion: mostrar login
+  // (loginScreen ya esta visible)
 })();
